@@ -1,0 +1,59 @@
+name: Static Analysis
+
+on:
+  push:
+    branches: [main, master, 'feature/**', 'fix/**', 'refactor/**', 'infra/**']
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cppcheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck clang-format clang-tidy ninja-build yamllint
+
+      - name: YAML lint
+        run: yamllint .github .yamllint.yml
+
+      - name: Format check
+        run: |
+          find include src tests -type f \( -name '*.c' -o -name '*.h' -o -name '*.cpp' \) \
+            | sort > format-files.txt
+          if [ -s format-files.txt ]; then
+            xargs clang-format --dry-run --Werror < format-files.txt
+          fi
+
+      - name: Configure clang-tidy database
+        run: cmake --preset ninja-debug
+
+      - name: Clang-tidy
+        run: |
+          find src tests \( -path tests/package_smoke -o -path tests/subproject_smoke \) \
+            -prune -o -type f -name '*.c' -print \
+            | sort > clang-tidy-files.txt
+          if [ -s clang-tidy-files.txt ]; then
+            xargs clang-tidy --warnings-as-errors='*' -p build/ninja-debug < clang-tidy-files.txt
+          fi
+
+      - name: Cppcheck
+        run: |
+          find src tests -type f -name '*.c' | sort > cppcheck-files.txt
+          cppcheck \
+            --std=c11 \
+            --enable=warning,performance,portability \
+            --max-configs=1 \
+            --quiet \
+            --error-exitcode=1 \
+            --file-list=cppcheck-files.txt \
+            -I include \
+            -I build/ninja-debug/generated/include

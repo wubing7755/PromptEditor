@@ -1,0 +1,13 @@
+Checks: >
+  clang-diagnostic-*,
+  clang-analyzer-*,
+  bugprone-*,
+  performance-*,
+  portability-*,
+  misc-*,
+  -misc-include-cleaner,
+  -misc-no-recursion,
+  -readability-*
+WarningsAsErrors: ''
+HeaderFilterRegex: '^(include|src|tests)/'
+FormatStyle: file
