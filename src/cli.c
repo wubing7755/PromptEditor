@@ -246,7 +246,7 @@ static int path_exists_as_dir(const char *path) {
         return 0;
     }
 
-    return S_ISDIR(info.st_mode);
+    return (info.st_mode & S_IFDIR) != 0;
 }
 
 static int path_exists_as_file(const char *path) {
@@ -256,7 +256,7 @@ static int path_exists_as_file(const char *path) {
         return 0;
     }
 
-    return S_ISREG(info.st_mode);
+    return (info.st_mode & S_IFREG) != 0;
 }
 
 static int join_path(char *out, size_t out_size, const char *left, const char *right) {
