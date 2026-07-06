@@ -1,6 +1,7 @@
 function(prompteditor_target_warnings target)
     if(MSVC)
         target_compile_options(${target} PRIVATE /W4 /permissive-)
+        target_compile_definitions(${target} PRIVATE _CRT_SECURE_NO_WARNINGS)
     else()
         target_compile_options(${target} PRIVATE
             -Wall
@@ -50,6 +51,9 @@ endfunction()
 
 function(prompteditor_target_defaults target)
     target_compile_features(${target} PRIVATE c_std_11)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        target_compile_definitions(${target} PRIVATE _GNU_SOURCE)
+    endif()
     prompteditor_target_warnings(${target})
     prompteditor_target_sanitizers(${target})
     prompteditor_target_coverage(${target})

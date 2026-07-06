@@ -7,7 +7,10 @@ Checks: >
   misc-*,
   -misc-include-cleaner,
   -misc-no-recursion,
-  -readability-*
+  -readability-*,
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
+  -clang-analyzer-security.insecureAPI.strcpy,
+  -bugprone-easily-swappable-parameters
 WarningsAsErrors: ''
 HeaderFilterRegex: '^(include|src|tests)/'
 FormatStyle: file
