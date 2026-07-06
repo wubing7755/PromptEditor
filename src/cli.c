@@ -246,7 +246,7 @@ static int path_exists_as_dir(const char *path) {
         return 0;
     }
 
-    return (info.st_mode & S_IFDIR) != 0;
+    return S_ISDIR(info.st_mode);
 }
 
 static int path_exists_as_file(const char *path) {
@@ -256,7 +256,7 @@ static int path_exists_as_file(const char *path) {
         return 0;
     }
 
-    return (info.st_mode & S_IFREG) != 0;
+    return S_ISREG(info.st_mode);
 }
 
 static int join_path(char *out, size_t out_size, const char *left, const char *right) {
@@ -1422,12 +1422,12 @@ static int spawn_editor(const char *current_content, char *out, size_t out_size)
     if (tmpdir == NULL || tmpdir[0] == '\0') {
         tmpdir = "/tmp";
     }
-    if (snprintf(temp_path, sizeof(temp_path), "%s/promptlib_edit_XXXXXX.txt", tmpdir) <= 0 ||
+    if (snprintf(temp_path, sizeof(temp_path), "%s/promptlib_edit_XXXXXX", tmpdir) <= 0 ||
         strlen(temp_path) >= sizeof(temp_path)) {
         fprintf(stderr, "Temporary path is too long.\n");
         return 0;
     }
-    fd = mkstemps(temp_path, 4);
+    fd = mkstemp(temp_path);
     if (fd < 0) {
         fprintf(stderr, "Could not create temporary file.\n");
         return 0;
@@ -3273,7 +3273,6 @@ static int run_browse(int argc, char **argv) {
         if (fzf_available) {
             /* Use fzf */
             FILE *fzf;
-            char selected[200];
             char fzf_cmd[65536];
 
             snprintf(fzf_cmd, sizeof(fzf_cmd),
