@@ -65,8 +65,8 @@
       "displayName": "Ninja AddressSanitizer",
       "inherits": "ninja-debug",
       "cacheVariables": {
-        "PROMPTEDITOR_ENABLE_ASAN": "ON",
-        "PROMPTEDITOR_ENABLE_UBSAN": "ON"
+        "PP_ENABLE_ASAN": "ON",
+        "PP_ENABLE_UBSAN": "ON"
       }
     },
     {
@@ -74,7 +74,7 @@
       "displayName": "Ninja Coverage",
       "inherits": "ninja-debug",
       "cacheVariables": {
-        "PROMPTEDITOR_ENABLE_COVERAGE": "ON"
+        "PP_ENABLE_COVERAGE": "ON"
       }
     },
     {
@@ -92,8 +92,8 @@
       "inherits": "debug",
       "binaryDir": "${sourceDir}/build/asan",
       "cacheVariables": {
-        "PROMPTEDITOR_ENABLE_ASAN": "ON",
-        "PROMPTEDITOR_ENABLE_UBSAN": "ON"
+        "PP_ENABLE_ASAN": "ON",
+        "PP_ENABLE_UBSAN": "ON"
       }
     },
     {
@@ -102,7 +102,7 @@
       "inherits": "debug",
       "binaryDir": "${sourceDir}/build/coverage",
       "cacheVariables": {
-        "PROMPTEDITOR_ENABLE_COVERAGE": "ON"
+        "PP_ENABLE_COVERAGE": "ON"
       }
     }
   ],

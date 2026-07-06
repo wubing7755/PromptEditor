@@ -1,6 +1,6 @@
 # CMake Guide
 
-This guide explains the common CMake workflows in this template. Use it when
+This guide explains the common CMake workflows in this project. Use it when
 you are new to CMake or when you need to add source files, tests, install rules,
 or downstream consumers.
 
@@ -47,7 +47,7 @@ local fallback when paired with CMake Tools, but do not enable multiple C/C++
 language services for the same workspace unless you intentionally manage their
 overlap.
 
-This template commits portable editor defaults:
+The project commits portable editor defaults:
 
 - `.vscode/extensions.json` recommends CMake Tools and clangd.
 - `.vscode/settings.json` tells VS Code to use the `ninja-debug` CMake preset,
@@ -79,36 +79,12 @@ not reliable. If build fails, tests and install are not meaningful.
 
 ## Quick Commands
 
-For a new checkout, start with bootstrap. It checks the required command-line
-tools and runs configure so clangd can read the compilation database:
-
-**Windows PowerShell**
-
-```powershell
-./scripts/bootstrap.ps1
-```
-
-**Linux/macOS**
-
 ```sh
-./scripts/bootstrap.sh
+./scripts/bootstrap.sh   # or .\scripts\bootstrap.ps1 on Windows
+./scripts/check.sh       # or .\scripts\check.ps1 on Windows
 ```
 
-Use the local check wrapper for daily development:
-
-**Windows PowerShell**
-
-```powershell
-./scripts/check.ps1
-```
-
-**Linux/macOS**
-
-```sh
-./scripts/check.sh
-```
-
-The direct CMake commands are still available when you need one step at a time:
+The check script runs configure, build, and tests. For one step at a time:
 
 ```sh
 cmake --preset ninja-debug
@@ -176,18 +152,18 @@ write `compile_commands.json` into the preset build directory.
 These options can be passed during configure:
 
 ```sh
-cmake --preset ninja-debug -DPROMPTEDITOR_BUILD_EXAMPLE=OFF
+cmake --preset ninja-debug -DPP_BUILD_EXAMPLE=OFF
 ```
 
 | Option | Meaning |
 | --- | --- |
 | `BUILD_SHARED_LIBS` | Builds libraries as shared libraries when supported. |
-| `PROMPTEDITOR_BUILD_EXAMPLE` | Builds `src/main.c` as the example executable. |
-| `PROMPTEDITOR_BUILD_TESTING` | Builds CTest test targets. |
-| `PROMPTEDITOR_INSTALL` | Generates install rules. |
-| `PROMPTEDITOR_ENABLE_ASAN` | Enables AddressSanitizer where supported. |
-| `PROMPTEDITOR_ENABLE_UBSAN` | Enables UndefinedBehaviorSanitizer where supported. |
-| `PROMPTEDITOR_ENABLE_COVERAGE` | Enables coverage flags where supported. |
+| `PP_BUILD_EXAMPLE` | Builds `src/main.c` as the example executable. |
+| `PP_BUILD_TESTING` | Builds CTest test targets. |
+| `PP_INSTALL` | Generates install rules. |
+| `PP_ENABLE_ASAN` | Enables AddressSanitizer where supported. |
+| `PP_ENABLE_UBSAN` | Enables UndefinedBehaviorSanitizer where supported. |
+| `PP_ENABLE_COVERAGE` | Enables coverage flags where supported. |
 
 Examples, tests, and install rules default to on for top-level builds. They
 default to off when this project is included through `add_subdirectory()`.
@@ -211,30 +187,9 @@ configure time instead.
 
 ## Toolchain Policy
 
-The build definition is the source of truth for language mode and include
-directories:
-
-- CMake minimum version: 3.21.
-- C language standard: C11, expressed as target feature `c_std_11`.
-- Supported compiler families: MSVC, GCC, Clang, and AppleClang.
-- Default generator: Ninja through the `ninja-*` presets.
-- Supported compatibility generators: any CMake generator that works with the
-  chosen compiler, including Visual Studio, Xcode, Ninja, and Make through the
-  generator-neutral presets or user presets.
-
-The repository declares requirements and recommended editor extensions, but it
-does not install compilers, SDKs, CMake, Ninja, VS Code extensions, or clangd for
-users. Keep install commands in contributor docs or platform onboarding notes
-when a project needs stricter setup guidance.
-
-Do not put machine-specific compiler paths, SDK paths, or Visual Studio
-installation paths in committed presets. Use user presets, CMake kits, a
-toolchain file, or environment setup scripts for local toolchain selection.
-
-Keep generated headers under the build tree and expose them through target
-include directories. Editors should learn those paths from CMake metadata or
-from local workspace configuration; source files should not include generated
-headers by relative filesystem paths.
+CMake 3.21+, C11 (`c_std_11`), Ninja default generator. Supported compilers:
+MSVC, GCC, Clang, AppleClang. See [ADR 0001](../adr/0001-c11-cmake-toolchain-policy.md)
+for the full policy.
 
 ## Add A Source File
 
@@ -243,7 +198,7 @@ Add implementation files under `src/prompteditor/` and public headers under
 
 1. Create the `.c` file under `src/prompteditor/`.
 2. Create or update the matching public header under `include/prompteditor/`.
-3. Add the new `.c` file to `PROMPTEDITOR_CORE_SOURCES` in `cmake/Sources.cmake`.
+3. Add the new `.c` file to `PP_CORE_SOURCES` in `cmake/Sources.cmake`.
 4. Add tests under `tests/`.
 5. Run `./scripts/check.ps1` or `./scripts/check.sh`.
 
@@ -252,10 +207,10 @@ C++ callers when they expose C APIs.
 
 ## Add A Test
 
-Use `prompteditor_add_test()` from `cmake/Tests.cmake`:
+Use `pp_add_test()` from `cmake/Tests.cmake`:
 
 ```cmake
-prompteditor_add_test(prompteditor_feature_tests
+pp_add_test(pp_feature_tests
     SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_feature.c
     LIBS
@@ -276,8 +231,6 @@ document the internal contract they protect.
 
 ## Install And Use With find_package
 
-Configure and build a release package:
-
 ```sh
 cmake --preset ninja-release
 cmake --build --preset ninja-release
@@ -291,9 +244,7 @@ find_package(PromptEditor CONFIG REQUIRED)
 target_link_libraries(app PRIVATE PromptEditor::prompteditor_core)
 ```
 
-The package smoke project validates this path:
-
-**Linux/macOS**
+Validate with the package smoke test (`.ps1` on Windows):
 
 ```sh
 cmake -G Ninja -S tests/package_smoke -B build/package-smoke -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$PWD/install"
@@ -301,72 +252,24 @@ cmake --build build/package-smoke --config Release
 ctest --test-dir build/package-smoke -C Release --output-on-failure
 ```
 
-**Windows PowerShell**
-
-```powershell
-cmake -G Ninja -S tests/package_smoke -B build/package-smoke -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$PWD/install"
-cmake --build build/package-smoke --config Release
-ctest --test-dir build/package-smoke -C Release --output-on-failure
-```
-
-For a shared-library install, use the `ninja-shared` preset and a separate install
-prefix:
-
-**Linux/macOS**
-
-```sh
-cmake --preset ninja-shared
-cmake --build --preset ninja-shared
-cmake --install build/ninja-shared --config Debug --prefix install-shared
-cmake -G Ninja -S tests/package_smoke -B build/package-smoke-shared -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="$PWD/install-shared"
-cmake --build build/package-smoke-shared --config Debug
-ctest --test-dir build/package-smoke-shared -C Debug --output-on-failure
-```
-
-**Windows PowerShell**
-
-```powershell
-cmake --preset ninja-shared
-cmake --build --preset ninja-shared
-cmake --install build/ninja-shared --config Debug --prefix install-shared
-cmake -G Ninja -S tests/package_smoke -B build/package-smoke-shared -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="$PWD/install-shared"
-cmake --build build/package-smoke-shared --config Debug
-ctest --test-dir build/package-smoke-shared -C Debug --output-on-failure
-```
-
-On Windows, shared-library consumers need the installed DLL next to the test
-executable or on `PATH`. The smoke project copies the imported runtime DLL when
-CMake exposes it through the installed target metadata.
+For shared-library installs, use the `ninja-shared` preset instead. On Windows,
+copy the installed DLL next to the test executable or add it to `PATH`.
 
 ## Use As A Subproject
 
-Projects can also consume this repository directly:
-
 ```cmake
-add_subdirectory(path/to/c-project-standard)
+add_subdirectory(path/to/PromptEditor)
 target_link_libraries(app PRIVATE PromptEditor::prompteditor_core)
 ```
 
-The subproject smoke test validates this mode:
-
-**Linux/macOS**
+When included as a subproject, examples, tests, and install rules default to off.
+Validate with the subproject smoke test:
 
 ```sh
-cmake -G Ninja -S tests/subproject_smoke -B build/subproject-smoke -DPROMPTEDITOR_SOURCE_DIR="$PWD"
-cmake --build build/subproject-smoke --config Debug
-ctest --test-dir build/subproject-smoke -C Debug --output-on-failure
+cmake -G Ninja -S tests/subproject_smoke -B build/subproject-smoke -DPP_SOURCE_DIR="$PWD"
+cmake --build build/subproject-smoke
+ctest --test-dir build/subproject-smoke --output-on-failure
 ```
-
-**Windows PowerShell**
-
-```powershell
-cmake -G Ninja -S tests/subproject_smoke -B build/subproject-smoke -DPROMPTEDITOR_SOURCE_DIR="$PWD"
-cmake --build build/subproject-smoke --config Debug
-ctest --test-dir build/subproject-smoke -C Debug --output-on-failure
-```
-
-When included as a subproject, examples, tests, and install rules default to
-off. A downstream project can enable them explicitly if needed.
 
 ## Generated Version Header
 

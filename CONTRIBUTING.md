@@ -7,33 +7,11 @@ This project uses focused, reviewable changes.
 See [doc/guides/cmake.md](doc/guides/cmake.md) for a detailed explanation of configure, build, test,
 install, presets, and common CMake troubleshooting.
 
-For a new checkout or a new machine, run bootstrap first.
-If you have not yet installed the required tools, see
-[doc/guides/environment.md](doc/guides/environment.md) for platform-specific
-instructions.
-
-**Linux/macOS**
+Setup and run local checks (`.ps1` on Windows PowerShell):
 
 ```sh
-./scripts/bootstrap.sh
-```
-
-**Windows PowerShell**
-
-```powershell
-./scripts/bootstrap.ps1
-```
-
-**Linux/macOS**
-
-```sh
-./scripts/check.sh
-```
-
-**Windows PowerShell**
-
-```powershell
-./scripts/check.ps1
+./scripts/bootstrap.sh   # first-time setup and configure
+./scripts/check.sh       # configure, build, and test
 ```
 
 Or run CMake directly:
@@ -73,6 +51,7 @@ Before opening a PR:
 - Link to updated docs when the change affects build, test, install, release,
   security, or public API behavior.
 - Keep unrelated cleanup out of feature or fix PRs.
+- Use `pp` in CLI examples and documentation.
 
 Use the issue templates for bug reports, feature proposals, and infrastructure
 maintenance requests.

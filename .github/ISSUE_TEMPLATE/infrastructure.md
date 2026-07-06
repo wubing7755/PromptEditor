@@ -21,7 +21,7 @@ Describe the build, CI, packaging, testing, or tooling change.
 
 ## Motivation
 
-Describe the maintenance risk, workflow gap, or template quality issue.
+Describe the maintenance risk, workflow gap, or project quality issue.
 
 ## Validation
 

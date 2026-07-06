@@ -86,4 +86,4 @@ prompt files remain the source of truth.
 ## Export And Backup
 
 `export` and `backup` produce directory-based libraries with the same layout as a
-normal prompt library. These directories can be restored with `promptlib import`.
+normal prompt library. These directories can be restored with `pp import`.

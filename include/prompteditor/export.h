@@ -1,14 +1,14 @@
-#ifndef PROMPTEDITOR_EXPORT_H
-#define PROMPTEDITOR_EXPORT_H
+#ifndef PP_EXPORT_H
+#define PP_EXPORT_H
 
-#if defined(_WIN32) && defined(PROMPTEDITOR_SHARED)
-#if defined(PROMPTEDITOR_BUILDING_LIBRARY)
-#define PROMPTEDITOR_API __declspec(dllexport)
+#if defined(_WIN32) && defined(PP_SHARED)
+#if defined(PP_BUILDING_LIBRARY)
+#define PP_API __declspec(dllexport)
 #else
-#define PROMPTEDITOR_API __declspec(dllimport)
+#define PP_API __declspec(dllimport)
 #endif
 #else
-#define PROMPTEDITOR_API
+#define PP_API
 #endif
 
-#endif /* PROMPTEDITOR_EXPORT_H */
+#endif /* PP_EXPORT_H */

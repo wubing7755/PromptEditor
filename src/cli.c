@@ -26,10 +26,10 @@
 #include <unistd.h>
 #define mkdir_one(path) mkdir((path), 0755)
 #endif
-#define PROMPTLIB_VERSION "0.1.0"
-#define PROMPTLIB_PATH_MAX 4096
-#define PROMPTLIB_FIELD_MAX 512
-#define PROMPTLIB_BODY_MAX 65536
+#define PP_CLI_VERSION "0.1.0"
+#define PP_PATH_MAX 4096
+#define PP_FIELD_MAX 512
+#define PP_BODY_MAX 65536
 
 struct prompt_options {
     const char *root;
@@ -44,7 +44,7 @@ struct prompt_options {
     const char *filter_tag;
     const char *note;
     const char *compare_version;
-    char tags[PROMPTLIB_FIELD_MAX];
+    char tags[PP_FIELD_MAX];
     int raw;
     int json;
     int no_pager;
@@ -55,18 +55,18 @@ struct prompt_options {
 };
 
 struct prompt_index_row {
-    char id[PROMPTLIB_FIELD_MAX];
-    char title[PROMPTLIB_FIELD_MAX];
-    char folder[PROMPTLIB_FIELD_MAX];
-    char category[PROMPTLIB_FIELD_MAX];
-    char tags[PROMPTLIB_FIELD_MAX];
-    char updated_at[PROMPTLIB_FIELD_MAX];
+    char id[PP_FIELD_MAX];
+    char title[PP_FIELD_MAX];
+    char folder[PP_FIELD_MAX];
+    char category[PP_FIELD_MAX];
+    char tags[PP_FIELD_MAX];
+    char updated_at[PP_FIELD_MAX];
 };
 
 static int index_file_path(char *out, size_t out_size, const char *root);
 
 static void print_help(void) {
-    puts("Usage: promptlib <command> [options]");
+    puts("Usage: pp<command> [options]");
     puts("");
     puts("Commands:");
     puts("  init       Initialize a prompt library folder");
@@ -88,11 +88,11 @@ static void print_help(void) {
     puts("  -h, --help       Show this help");
     puts("  -v, --version    Show version");
     puts("");
-    puts("Run 'promptlib <command> --help' for command-specific usage.");
+    puts("Run 'pp<command> --help' for command-specific usage.");
 }
 
 static void print_init_help(void) {
-    puts("Usage: promptlib init [--root <path>]");
+    puts("Usage: ppinit [--root <path>]");
     puts("");
     puts("Initializes a prompt library folder.");
     puts("");
@@ -102,7 +102,7 @@ static void print_init_help(void) {
 }
 
 static void print_add_help(void) {
-    puts("Usage: promptlib add --title <text> --body <text> [options]");
+    puts("Usage: ppadd --title <text> --body <text> [options]");
     puts("");
     puts("Options:");
     puts("  --root <path>          Library root");
@@ -116,7 +116,7 @@ static void print_add_help(void) {
 }
 
 static void print_list_help(void) {
-    puts("Usage: promptlib list [--root <path>] [filters] [--json] [--no-pager]");
+    puts("Usage: pplist [--root <path>] [filters] [--json] [--no-pager]");
     puts("");
     puts("Options:");
     puts("  --root <path>          Library root");
@@ -128,7 +128,7 @@ static void print_list_help(void) {
 }
 
 static void print_show_help(void) {
-    puts("Usage: promptlib show <id-or-title> [--root <path>] [--raw] [--json]");
+    puts("Usage: ppshow <id-or-title> [--root <path>] [--raw] [--json]");
     puts("");
     puts("Options:");
     puts("  --root <path>          Library root");
@@ -137,7 +137,7 @@ static void print_show_help(void) {
 }
 
 static void print_search_help(void) {
-    puts("Usage: promptlib search <query> [--root <path>] [filters] [--raw] [--json]");
+    puts("Usage: ppsearch <query> [--root <path>] [filters] [--raw] [--json]");
     puts("");
     puts("Options:");
     puts("  --root <path>          Library root");
@@ -148,7 +148,7 @@ static void print_search_help(void) {
 }
 
 static void print_edit_help(void) {
-    puts("Usage: promptlib edit <id-or-title> [--root <path>] [options]");
+    puts("Usage: ppedit <id-or-title> [--root <path>] [options]");
     puts("");
     puts("If no --body, --category, --tag, --description, --title, or --folder is given,");
     puts("the editor opens for editing the prompt body.");
@@ -163,7 +163,7 @@ static void print_edit_help(void) {
 }
 
 static void print_browse_help(void) {
-    puts("Usage: promptlib browse [--root <path>] [filters]");
+    puts("Usage: ppbrowse [--root <path>] [filters]");
     puts("");
     puts("Opens an interactive prompt browser.");
     puts("If fzf is installed, it is used for fuzzy filtering with a preview window.");
@@ -181,13 +181,13 @@ static void print_browse_help(void) {
 }
 
 static void print_delete_help(void) {
-    puts("Usage: promptlib delete <id-or-title> [--root <path>] [--yes]");
+    puts("Usage: ppdelete <id-or-title> [--root <path>] [--yes]");
     puts("");
     puts("Deletes are archived by default. Pass --yes to confirm.");
 }
 
 static void print_optimize_help(void) {
-    puts("Usage: promptlib optimize <id-or-title> [--root <path>] [options]");
+    puts("Usage: ppoptimize <id-or-title> [--root <path>] [options]");
     puts("");
     puts("Options:");
     puts("  --body <text>          Optimized prompt body");
@@ -198,7 +198,7 @@ static void print_optimize_help(void) {
 }
 
 static void print_folder_help(void) {
-    puts("Usage: promptlib folder <list|create|remove|rename> [name] [options]");
+    puts("Usage: ppfolder <list|create|remove|rename> [name] [options]");
     puts("");
     puts("Options:");
     puts("  --root <path>          Library root");
@@ -207,7 +207,7 @@ static void print_folder_help(void) {
 }
 
 static void print_category_help(void) {
-    puts("Usage: promptlib category <list|create|remove|rename> [name] [options]");
+    puts("Usage: ppcategory <list|create|remove|rename> [name] [options]");
     puts("");
     puts("Options:");
     puts("  --root <path>          Library root");
@@ -216,19 +216,19 @@ static void print_category_help(void) {
 }
 
 static void print_export_help(void) {
-    puts("Usage: promptlib export --out <path> [--root <path>] [--folder <path>]");
+    puts("Usage: ppexport --out <path> [--root <path>] [--folder <path>]");
 }
 
 static void print_import_help(void) {
-    puts("Usage: promptlib import <path> [--root <path>] [--on-conflict skip|replace]");
+    puts("Usage: ppimport <path> [--root <path>] [--on-conflict skip|replace]");
 }
 
 static void print_backup_help(void) {
-    puts("Usage: promptlib backup --out <path> [--root <path>]");
+    puts("Usage: ppbackup --out <path> [--root <path>]");
 }
 
 static void print_version(void) {
-    puts("promptlib " PROMPTLIB_VERSION);
+    puts("pp " PP_CLI_VERSION);
 }
 
 static int is_help_flag(const char *arg) {
@@ -296,7 +296,7 @@ static int make_dir_if_missing(const char *path) {
 }
 
 static int make_dir_recursive(const char *path) {
-    char partial[PROMPTLIB_PATH_MAX];
+    char partial[PP_PATH_MAX];
     size_t index;
     size_t length;
 
@@ -355,7 +355,7 @@ static int write_text_file_if_missing(const char *path, const char *content) {
 }
 
 static int write_text_file(const char *path, const char *content) {
-    char temp_path[PROMPTLIB_PATH_MAX];
+    char temp_path[PP_PATH_MAX];
     FILE *file;
 
     if (snprintf(temp_path, sizeof(temp_path), "%s.tmp", path) <= 0 ||
@@ -459,7 +459,7 @@ static int read_text_file(const char *path, char *out, size_t out_size) {
 }
 
 static int copy_text_file(const char *source, const char *destination) {
-    char content[PROMPTLIB_BODY_MAX];
+    char content[PP_BODY_MAX];
 
     return read_text_file(source, content, sizeof(content)) &&
            write_text_file(destination, content);
@@ -515,13 +515,13 @@ static int resolve_root_arg(int start_index, int argc, char **argv, char *out, s
 }
 
 static int init_library(const char *root) {
-    char meta_dir[PROMPTLIB_PATH_MAX];
-    char prompts_dir[PROMPTLIB_PATH_MAX];
-    char archive_dir[PROMPTLIB_PATH_MAX];
-    char version_file[PROMPTLIB_PATH_MAX];
-    char index_file[PROMPTLIB_PATH_MAX];
-    char folders_file[PROMPTLIB_PATH_MAX];
-    char categories_file[PROMPTLIB_PATH_MAX];
+    char meta_dir[PP_PATH_MAX];
+    char prompts_dir[PP_PATH_MAX];
+    char archive_dir[PP_PATH_MAX];
+    char version_file[PP_PATH_MAX];
+    char index_file[PP_PATH_MAX];
+    char folders_file[PP_PATH_MAX];
+    char categories_file[PP_PATH_MAX];
 
     if (!make_dir_recursive(root) || !join_path(meta_dir, sizeof(meta_dir), root, ".promptlib") ||
         !join_path(prompts_dir, sizeof(prompts_dir), root, "prompts") ||
@@ -545,9 +545,9 @@ static int init_library(const char *root) {
 }
 
 static int validate_library_root(const char *root) {
-    char meta_dir[PROMPTLIB_PATH_MAX];
-    char prompts_dir[PROMPTLIB_PATH_MAX];
-    char index_file[PROMPTLIB_PATH_MAX];
+    char meta_dir[PP_PATH_MAX];
+    char prompts_dir[PP_PATH_MAX];
+    char index_file[PP_PATH_MAX];
 
     if (!join_path(meta_dir, sizeof(meta_dir), root, ".promptlib") ||
         !join_path(prompts_dir, sizeof(prompts_dir), root, "prompts") ||
@@ -559,7 +559,7 @@ static int validate_library_root(const char *root) {
     if (!path_exists_as_dir(root) || !path_exists_as_dir(meta_dir) ||
         !path_exists_as_dir(prompts_dir) || !path_exists_as_file(index_file)) {
         fprintf(stderr, "Invalid prompt library root: %s\n", root);
-        fprintf(stderr, "Run 'promptlib init --root %s' first.\n", root);
+        fprintf(stderr, "Run 'ppinit --root %s' first.\n", root);
         return 0;
     }
 
@@ -616,7 +616,7 @@ static void slugify_title(const char *title, char *out, size_t out_size) {
 }
 
 static void prompt_id_from_title(const char *title, char *out, size_t out_size) {
-    char slug[PROMPTLIB_FIELD_MAX];
+    char slug[PP_FIELD_MAX];
 
     slugify_title(title, slug, sizeof(slug));
     snprintf(out, out_size, "%s-%04lx", slug, hash_text(title) & 0xffffUL);
@@ -633,7 +633,7 @@ static int field_has_unsupported_chars(const char *value) {
 }
 
 static int field_is_too_long(const char *value) {
-    return value != NULL && strlen(value) >= PROMPTLIB_FIELD_MAX;
+    return value != NULL && strlen(value) >= PP_FIELD_MAX;
 }
 
 static int valid_version_name(const char *value) {
@@ -678,7 +678,7 @@ static int add_tag_value(struct prompt_options *options, const char *tag) {
 }
 
 static int tag_list_contains(const char *tags, const char *tag) {
-    char copy[PROMPTLIB_FIELD_MAX];
+    char copy[PP_FIELD_MAX];
     char *current;
 
     if (tag == NULL || tag[0] == '\0') {
@@ -804,9 +804,9 @@ static int parse_index_row(char *line, struct prompt_index_row *row) {
 }
 
 static int find_prompt(const char *root, const char *id_or_title, struct prompt_index_row *found) {
-    char meta_dir[PROMPTLIB_PATH_MAX];
-    char index_file[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_BODY_MAX];
+    char meta_dir[PP_PATH_MAX];
+    char index_file[PP_PATH_MAX];
+    char line[PP_BODY_MAX];
     FILE *file;
 
     if (!join_path(meta_dir, sizeof(meta_dir), root, ".promptlib") ||
@@ -837,9 +837,9 @@ static int find_prompt(const char *root, const char *id_or_title, struct prompt_
 
 static int prompt_body_path(char *out, size_t out_size, const char *root,
                             const struct prompt_index_row *row) {
-    char prompts_dir[PROMPTLIB_PATH_MAX];
-    char folder_dir[PROMPTLIB_PATH_MAX];
-    char prompt_dir[PROMPTLIB_PATH_MAX];
+    char prompts_dir[PP_PATH_MAX];
+    char folder_dir[PP_PATH_MAX];
+    char prompt_dir[PP_PATH_MAX];
 
     return join_path(prompts_dir, sizeof(prompts_dir), root, "prompts") &&
            join_path(folder_dir, sizeof(folder_dir), prompts_dir, row->folder) &&
@@ -849,8 +849,8 @@ static int prompt_body_path(char *out, size_t out_size, const char *root,
 
 static int prompt_dir_path(char *out, size_t out_size, const char *root,
                            const struct prompt_index_row *row) {
-    char prompts_dir[PROMPTLIB_PATH_MAX];
-    char folder_dir[PROMPTLIB_PATH_MAX];
+    char prompts_dir[PP_PATH_MAX];
+    char folder_dir[PP_PATH_MAX];
 
     return join_path(prompts_dir, sizeof(prompts_dir), root, "prompts") &&
            join_path(folder_dir, sizeof(folder_dir), prompts_dir, row->folder) &&
@@ -859,7 +859,7 @@ static int prompt_dir_path(char *out, size_t out_size, const char *root,
 
 static int prompt_metadata_path(char *out, size_t out_size, const char *root,
                                 const struct prompt_index_row *row) {
-    char prompt_dir[PROMPTLIB_PATH_MAX];
+    char prompt_dir[PP_PATH_MAX];
 
     return prompt_dir_path(prompt_dir, sizeof(prompt_dir), root, row) &&
            join_path(out, out_size, prompt_dir, "metadata.tsv");
@@ -867,7 +867,7 @@ static int prompt_metadata_path(char *out, size_t out_size, const char *root,
 
 static int versions_dir_path(char *out, size_t out_size, const char *root,
                              const struct prompt_index_row *row) {
-    char prompt_dir[PROMPTLIB_PATH_MAX];
+    char prompt_dir[PP_PATH_MAX];
 
     return prompt_dir_path(prompt_dir, sizeof(prompt_dir), root, row) &&
            join_path(out, out_size, prompt_dir, "versions");
@@ -875,8 +875,8 @@ static int versions_dir_path(char *out, size_t out_size, const char *root,
 
 static int version_body_path(char *out, size_t out_size, const char *root,
                              const struct prompt_index_row *row, const char *version) {
-    char versions_dir[PROMPTLIB_PATH_MAX];
-    char filename[PROMPTLIB_FIELD_MAX];
+    char versions_dir[PP_PATH_MAX];
+    char filename[PP_FIELD_MAX];
 
     return snprintf(filename, sizeof(filename), "%s.txt", version) > 0 &&
            strlen(filename) < sizeof(filename) &&
@@ -886,8 +886,8 @@ static int version_body_path(char *out, size_t out_size, const char *root,
 
 static int version_metadata_path(char *out, size_t out_size, const char *root,
                                  const struct prompt_index_row *row, const char *version) {
-    char versions_dir[PROMPTLIB_PATH_MAX];
-    char filename[PROMPTLIB_FIELD_MAX];
+    char versions_dir[PP_PATH_MAX];
+    char filename[PP_FIELD_MAX];
 
     return snprintf(filename, sizeof(filename), "%s.tsv", version) > 0 &&
            strlen(filename) < sizeof(filename) &&
@@ -897,15 +897,15 @@ static int version_metadata_path(char *out, size_t out_size, const char *root,
 
 static int versions_index_path(char *out, size_t out_size, const char *root,
                                const struct prompt_index_row *row) {
-    char versions_dir[PROMPTLIB_PATH_MAX];
+    char versions_dir[PP_PATH_MAX];
 
     return versions_dir_path(versions_dir, sizeof(versions_dir), root, row) &&
            join_path(out, out_size, versions_dir, "index.tsv");
 }
 
 static int append_prompt_index_row(const char *root, const struct prompt_index_row *row) {
-    char index_file[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_BODY_MAX];
+    char index_file[PP_PATH_MAX];
+    char line[PP_BODY_MAX];
 
     if (!index_file_path(index_file, sizeof(index_file), root)) {
         return 0;
@@ -919,11 +919,11 @@ static int append_prompt_index_row(const char *root, const struct prompt_index_r
 
 static int copy_prompt_versions(const char *source_root, const char *destination_root,
                                 const struct prompt_index_row *row) {
-    char source_versions_dir[PROMPTLIB_PATH_MAX];
-    char destination_versions_dir[PROMPTLIB_PATH_MAX];
-    char source_index[PROMPTLIB_PATH_MAX];
-    char destination_index[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_BODY_MAX];
+    char source_versions_dir[PP_PATH_MAX];
+    char destination_versions_dir[PP_PATH_MAX];
+    char source_index[PP_PATH_MAX];
+    char destination_index[PP_PATH_MAX];
+    char line[PP_BODY_MAX];
     FILE *file;
 
     if (!versions_dir_path(source_versions_dir, sizeof(source_versions_dir), source_root, row) ||
@@ -949,12 +949,12 @@ static int copy_prompt_versions(const char *source_root, const char *destination
     }
 
     while (fgets(line, sizeof(line), file) != NULL) {
-        char row_line[PROMPTLIB_BODY_MAX];
+        char row_line[PP_BODY_MAX];
         char *version;
-        char source_body[PROMPTLIB_PATH_MAX];
-        char destination_body[PROMPTLIB_PATH_MAX];
-        char source_meta[PROMPTLIB_PATH_MAX];
-        char destination_meta[PROMPTLIB_PATH_MAX];
+        char source_body[PP_PATH_MAX];
+        char destination_body[PP_PATH_MAX];
+        char source_meta[PP_PATH_MAX];
+        char destination_meta[PP_PATH_MAX];
 
         snprintf(row_line, sizeof(row_line), "%s", line);
         version = strtok(row_line, "\t\r\n");
@@ -980,11 +980,11 @@ static int copy_prompt_versions(const char *source_root, const char *destination
 
 static int copy_prompt_payload(const char *source_root, const char *destination_root,
                                const struct prompt_index_row *row) {
-    char destination_prompt_dir[PROMPTLIB_PATH_MAX];
-    char source_body[PROMPTLIB_PATH_MAX];
-    char destination_body[PROMPTLIB_PATH_MAX];
-    char source_metadata[PROMPTLIB_PATH_MAX];
-    char destination_metadata[PROMPTLIB_PATH_MAX];
+    char destination_prompt_dir[PP_PATH_MAX];
+    char source_body[PP_PATH_MAX];
+    char destination_body[PP_PATH_MAX];
+    char source_metadata[PP_PATH_MAX];
+    char destination_metadata[PP_PATH_MAX];
 
     return prompt_dir_path(destination_prompt_dir, sizeof(destination_prompt_dir), destination_root,
                            row) &&
@@ -1000,14 +1000,14 @@ static int copy_prompt_payload(const char *source_root, const char *destination_
 }
 
 static int index_file_path(char *out, size_t out_size, const char *root) {
-    char meta_dir[PROMPTLIB_PATH_MAX];
+    char meta_dir[PP_PATH_MAX];
 
     return join_path(meta_dir, sizeof(meta_dir), root, ".promptlib") &&
            join_path(out, out_size, meta_dir, "index.tsv");
 }
 
 static int registry_file_path(char *out, size_t out_size, const char *root, const char *kind) {
-    char meta_dir[PROMPTLIB_PATH_MAX];
+    char meta_dir[PP_PATH_MAX];
     const char *filename = strcmp(kind, "folder") == 0 ? "folders.tsv" : "categories.tsv";
 
     return join_path(meta_dir, sizeof(meta_dir), root, ".promptlib") &&
@@ -1015,8 +1015,8 @@ static int registry_file_path(char *out, size_t out_size, const char *root, cons
 }
 
 static int registry_contains(const char *root, const char *kind, const char *name) {
-    char registry_file[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_FIELD_MAX];
+    char registry_file[PP_PATH_MAX];
+    char line[PP_FIELD_MAX];
     FILE *file;
 
     if (!registry_file_path(registry_file, sizeof(registry_file), root, kind)) {
@@ -1041,8 +1041,8 @@ static int registry_contains(const char *root, const char *kind, const char *nam
 }
 
 static int registry_add(const char *root, const char *kind, const char *name) {
-    char registry_file[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_FIELD_MAX];
+    char registry_file[PP_PATH_MAX];
+    char line[PP_FIELD_MAX];
 
     if (field_is_too_long(name) || field_has_unsupported_chars(name) ||
         (strcmp(kind, "folder") == 0 && path_has_unsafe_segment(name))) {
@@ -1064,9 +1064,9 @@ static int registry_add(const char *root, const char *kind, const char *name) {
 
 static int registry_rewrite(const char *root, const char *kind, const char *from, const char *to,
                             int remove_target) {
-    char registry_file[PROMPTLIB_PATH_MAX];
-    char temp_file[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_FIELD_MAX];
+    char registry_file[PP_PATH_MAX];
+    char temp_file[PP_PATH_MAX];
+    char line[PP_FIELD_MAX];
     FILE *input;
     FILE *output;
 
@@ -1090,7 +1090,7 @@ static int registry_rewrite(const char *root, const char *kind, const char *from
     }
 
     while (fgets(line, sizeof(line), input) != NULL) {
-        char clean[PROMPTLIB_FIELD_MAX];
+        char clean[PP_FIELD_MAX];
         snprintf(clean, sizeof(clean), "%s", line);
         clean[strcspn(clean, "\r\n")] = '\0';
         if (strcmp(clean, from) == 0) {
@@ -1115,8 +1115,8 @@ static int registry_rewrite(const char *root, const char *kind, const char *from
 }
 
 static int registry_list(const char *root, const char *kind) {
-    char registry_file[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_FIELD_MAX];
+    char registry_file[PP_PATH_MAX];
+    char line[PP_FIELD_MAX];
     FILE *file;
 
     if (!registry_file_path(registry_file, sizeof(registry_file), root, kind)) {
@@ -1139,7 +1139,7 @@ static int registry_list(const char *root, const char *kind) {
 static int read_metadata_value(const char *metadata_file, const char *key, char *out,
                                size_t out_size) {
     FILE *file;
-    char line[PROMPTLIB_BODY_MAX];
+    char line[PP_BODY_MAX];
     size_t key_len = strlen(key);
 
     file = fopen(metadata_file, "rb");
@@ -1163,8 +1163,8 @@ static int read_metadata_value(const char *metadata_file, const char *key, char 
 
 static int write_prompt_metadata(const char *root, const struct prompt_index_row *row,
                                  const char *description, const char *current_version) {
-    char metadata_file[PROMPTLIB_PATH_MAX];
-    char metadata[PROMPTLIB_BODY_MAX];
+    char metadata_file[PP_PATH_MAX];
+    char metadata[PP_BODY_MAX];
 
     if (!prompt_metadata_path(metadata_file, sizeof(metadata_file), root, row)) {
         return 0;
@@ -1190,9 +1190,9 @@ static void format_version_number(int version, char *out, size_t out_size) {
 }
 
 static int next_version_number(const char *root, const struct prompt_index_row *row) {
-    char index_file[PROMPTLIB_PATH_MAX];
+    char index_file[PP_PATH_MAX];
     FILE *file;
-    char line[PROMPTLIB_BODY_MAX];
+    char line[PP_BODY_MAX];
     int max_version = 1;
 
     if (!versions_index_path(index_file, sizeof(index_file), root, row) ||
@@ -1218,9 +1218,9 @@ static int next_version_number(const char *root, const struct prompt_index_row *
 
 static int rewrite_index_row(const char *root, const struct prompt_index_row *target,
                              int remove_target) {
-    char index_file[PROMPTLIB_PATH_MAX];
-    char temp_file[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_BODY_MAX];
+    char index_file[PP_PATH_MAX];
+    char temp_file[PP_PATH_MAX];
+    char line[PP_BODY_MAX];
     FILE *input;
     FILE *output;
 
@@ -1245,7 +1245,7 @@ static int rewrite_index_row(const char *root, const struct prompt_index_row *ta
     }
 
     while (fgets(line, sizeof(line), input) != NULL) {
-        char row_line[PROMPTLIB_BODY_MAX];
+        char row_line[PP_BODY_MAX];
         struct prompt_index_row row;
 
         snprintf(row_line, sizeof(row_line), "%s", line);
@@ -1272,7 +1272,7 @@ static int rewrite_index_row(const char *root, const struct prompt_index_row *ta
 }
 
 static int run_init(int argc, char **argv) {
-    char root[PROMPTLIB_PATH_MAX];
+    char root[PP_PATH_MAX];
     int index;
 
     for (index = 2; index < argc; ++index) {
@@ -1369,8 +1369,8 @@ static int parse_add_options(int argc, char **argv, struct prompt_options *optio
  */
 static int spawn_editor(const char *current_content, char *out, size_t out_size) {
     const char *editor;
-    char temp_path[PROMPTLIB_PATH_MAX];
-    char cmd[PROMPTLIB_PATH_MAX + 128];
+    char temp_path[PP_PATH_MAX];
+    char cmd[PP_PATH_MAX + 128];
     FILE *file;
 
 #ifdef _WIN32
@@ -1480,18 +1480,18 @@ static int spawn_editor(const char *current_content, char *out, size_t out_size)
 
 static int run_add(int argc, char **argv) {
     struct prompt_options options;
-    char root[PROMPTLIB_PATH_MAX];
-    char id[PROMPTLIB_FIELD_MAX];
-    char timestamp[PROMPTLIB_FIELD_MAX];
-    char prompts_dir[PROMPTLIB_PATH_MAX];
-    char folder_dir[PROMPTLIB_PATH_MAX];
-    char prompt_dir[PROMPTLIB_PATH_MAX];
-    char body_file[PROMPTLIB_PATH_MAX];
-    char metadata_file[PROMPTLIB_PATH_MAX];
-    char meta_dir[PROMPTLIB_PATH_MAX];
-    char index_file[PROMPTLIB_PATH_MAX];
-    char metadata[PROMPTLIB_BODY_MAX];
-    char index_row[PROMPTLIB_BODY_MAX];
+    char root[PP_PATH_MAX];
+    char id[PP_FIELD_MAX];
+    char timestamp[PP_FIELD_MAX];
+    char prompts_dir[PP_PATH_MAX];
+    char folder_dir[PP_PATH_MAX];
+    char prompt_dir[PP_PATH_MAX];
+    char body_file[PP_PATH_MAX];
+    char metadata_file[PP_PATH_MAX];
+    char meta_dir[PP_PATH_MAX];
+    char index_file[PP_PATH_MAX];
+    char metadata[PP_BODY_MAX];
+    char index_row[PP_BODY_MAX];
     int parsed;
 
     memset(&options, 0, sizeof(options));
@@ -1553,7 +1553,7 @@ static int run_add(int argc, char **argv) {
     }
 
     if (options.editor) {
-        char edited_body[PROMPTLIB_BODY_MAX];
+        char edited_body[PP_BODY_MAX];
         if (!spawn_editor(options.body == NULL ? "" : options.body, edited_body,
                           sizeof(edited_body)) ||
             !write_text_file(body_file, edited_body)) {
@@ -1635,7 +1635,7 @@ static int escape_json(const char *input, char *out, size_t out_size) {
  * print_json_prompt_row - Prints a single prompt index row as JSON to stdout.
  */
 static void print_json_prompt_row(const struct prompt_index_row *row) {
-    char buf[PROMPTLIB_BODY_MAX];
+    char buf[PP_BODY_MAX];
 
     printf("  {");
     escape_json(row->id, buf, sizeof(buf));
@@ -1657,7 +1657,7 @@ static void print_json_prompt_row(const struct prompt_index_row *row) {
  * print_json_prompt_body - Prints a prompt body as a JSON string to stdout.
  */
 static void print_json_body(const char *body) {
-    char buf[PROMPTLIB_BODY_MAX];
+    char buf[PP_BODY_MAX];
 
     escape_json(body, buf, sizeof(buf));
     printf("\"%s\"", buf);
@@ -1733,10 +1733,10 @@ static void pager_close(FILE *p) {
 }
 
 static int run_list(int argc, char **argv) {
-    char root[PROMPTLIB_PATH_MAX];
-    char meta_dir[PROMPTLIB_PATH_MAX];
-    char index_file[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_BODY_MAX];
+    char root[PP_PATH_MAX];
+    char meta_dir[PP_PATH_MAX];
+    char index_file[PP_PATH_MAX];
+    char line[PP_BODY_MAX];
     struct prompt_options filters;
     FILE *file;
     FILE *out;
@@ -1862,9 +1862,9 @@ static int run_list(int argc, char **argv) {
 }
 
 static int run_show(int argc, char **argv) {
-    char root[PROMPTLIB_PATH_MAX];
-    char body_file[PROMPTLIB_PATH_MAX];
-    char body[PROMPTLIB_BODY_MAX];
+    char root[PP_PATH_MAX];
+    char body_file[PP_PATH_MAX];
+    char body[PP_BODY_MAX];
     struct prompt_options options;
     struct prompt_index_row row;
     int index;
@@ -1914,7 +1914,7 @@ static int run_show(int argc, char **argv) {
     }
 
     if (options.json) {
-        char buf[PROMPTLIB_BODY_MAX];
+        char buf[PP_BODY_MAX];
 
         printf("{\n");
         escape_json(row.id, buf, sizeof(buf));
@@ -1959,9 +1959,9 @@ static int run_show(int argc, char **argv) {
 }
 
 static int run_search(int argc, char **argv) {
-    char root[PROMPTLIB_PATH_MAX];
-    char index_file[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_BODY_MAX];
+    char root[PP_PATH_MAX];
+    char index_file[PP_PATH_MAX];
+    char line[PP_BODY_MAX];
     struct prompt_options options;
     FILE *file;
     int index;
@@ -2036,9 +2036,9 @@ static int run_search(int argc, char **argv) {
     }
 
     while (fgets(line, sizeof(line), file) != NULL) {
-        char row_line[PROMPTLIB_BODY_MAX];
-        char body_file[PROMPTLIB_PATH_MAX];
-        char body[PROMPTLIB_BODY_MAX];
+        char row_line[PP_BODY_MAX];
+        char body_file[PP_PATH_MAX];
+        char body[PP_BODY_MAX];
         struct prompt_index_row row;
 
         snprintf(row_line, sizeof(row_line), "%s", line);
@@ -2077,12 +2077,12 @@ static int run_search(int argc, char **argv) {
 }
 
 static int run_edit(int argc, char **argv) {
-    char root[PROMPTLIB_PATH_MAX];
-    char body_file[PROMPTLIB_PATH_MAX];
-    char metadata_file[PROMPTLIB_PATH_MAX];
-    char timestamp[PROMPTLIB_FIELD_MAX];
-    char metadata[PROMPTLIB_BODY_MAX];
-    char edited_body[PROMPTLIB_BODY_MAX];
+    char root[PP_PATH_MAX];
+    char body_file[PP_PATH_MAX];
+    char metadata_file[PP_PATH_MAX];
+    char timestamp[PP_FIELD_MAX];
+    char metadata[PP_BODY_MAX];
+    char edited_body[PP_BODY_MAX];
     struct prompt_options options;
     struct prompt_index_row row;
     int index;
@@ -2187,7 +2187,7 @@ static int run_edit(int argc, char **argv) {
     }
 
     if (edit_mode) {
-        char current_body[PROMPTLIB_BODY_MAX];
+        char current_body[PP_BODY_MAX];
         if (!read_text_file(body_file, current_body, sizeof(current_body)) ||
             !spawn_editor(current_body, edited_body, sizeof(edited_body)) ||
             !write_text_file(body_file, edited_body)) {
@@ -2231,8 +2231,8 @@ static int run_edit(int argc, char **argv) {
 static int append_version_index(const char *root, const struct prompt_index_row *row,
                                 const char *version, const char *timestamp, const char *promoted,
                                 const char *note) {
-    char index_file[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_BODY_MAX];
+    char index_file[PP_PATH_MAX];
+    char line[PP_BODY_MAX];
 
     if (!versions_index_path(index_file, sizeof(index_file), root, row) ||
         !write_text_file_if_missing(index_file, "version\tpromoted\tcreated_at\tnote\n")) {
@@ -2246,8 +2246,8 @@ static int append_version_index(const char *root, const struct prompt_index_row 
 }
 
 static int show_version_history(const char *root, const struct prompt_index_row *row) {
-    char index_file[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_BODY_MAX];
+    char index_file[PP_PATH_MAX];
+    char line[PP_BODY_MAX];
     FILE *file;
 
     if (!versions_index_path(index_file, sizeof(index_file), root, row) ||
@@ -2271,10 +2271,10 @@ static int show_version_history(const char *root, const struct prompt_index_row 
 
 static int compare_version(const char *root, const struct prompt_index_row *row,
                            const char *version) {
-    char current_file[PROMPTLIB_PATH_MAX];
-    char version_file[PROMPTLIB_PATH_MAX];
-    char current_body[PROMPTLIB_BODY_MAX];
-    char version_body[PROMPTLIB_BODY_MAX];
+    char current_file[PP_PATH_MAX];
+    char version_file[PP_PATH_MAX];
+    char current_body[PP_BODY_MAX];
+    char version_body[PP_BODY_MAX];
 
     if (!valid_version_name(version)) {
         fprintf(stderr, "Invalid version.\n");
@@ -2306,16 +2306,16 @@ static int compare_version(const char *root, const struct prompt_index_row *row,
 }
 
 static int run_optimize(int argc, char **argv) {
-    char root[PROMPTLIB_PATH_MAX];
-    char versions_dir[PROMPTLIB_PATH_MAX];
-    char version[PROMPTLIB_FIELD_MAX];
-    char timestamp[PROMPTLIB_FIELD_MAX];
-    char version_body_file[PROMPTLIB_PATH_MAX];
-    char version_metadata_file[PROMPTLIB_PATH_MAX];
-    char current_body_file[PROMPTLIB_PATH_MAX];
-    char metadata_file[PROMPTLIB_PATH_MAX];
-    char current_version[PROMPTLIB_FIELD_MAX];
-    char version_metadata[PROMPTLIB_BODY_MAX];
+    char root[PP_PATH_MAX];
+    char versions_dir[PP_PATH_MAX];
+    char version[PP_FIELD_MAX];
+    char timestamp[PP_FIELD_MAX];
+    char version_body_file[PP_PATH_MAX];
+    char version_metadata_file[PP_PATH_MAX];
+    char current_body_file[PP_PATH_MAX];
+    char metadata_file[PP_PATH_MAX];
+    char current_version[PP_FIELD_MAX];
+    char version_metadata[PP_BODY_MAX];
     struct prompt_options options;
     struct prompt_index_row row;
     int index;
@@ -2434,10 +2434,10 @@ static int run_optimize(int argc, char **argv) {
 }
 
 static int run_delete(int argc, char **argv) {
-    char root[PROMPTLIB_PATH_MAX];
-    char prompt_dir[PROMPTLIB_PATH_MAX];
-    char archive_dir[PROMPTLIB_PATH_MAX];
-    char archived_prompt_dir[PROMPTLIB_PATH_MAX];
+    char root[PP_PATH_MAX];
+    char prompt_dir[PP_PATH_MAX];
+    char archive_dir[PP_PATH_MAX];
+    char archived_prompt_dir[PP_PATH_MAX];
     struct prompt_options options;
     struct prompt_index_row row;
     int confirmed = 0;
@@ -2511,8 +2511,8 @@ static int run_delete(int argc, char **argv) {
 }
 
 static int registry_name_in_use(const char *root, const char *kind, const char *name) {
-    char index_file[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_BODY_MAX];
+    char index_file[PP_PATH_MAX];
+    char line[PP_BODY_MAX];
     FILE *file;
 
     if (!index_file_path(index_file, sizeof(index_file), root)) {
@@ -2541,9 +2541,9 @@ static int registry_name_in_use(const char *root, const char *kind, const char *
 
 static int update_registry_references(const char *root, const char *kind, const char *from,
                                       const char *to) {
-    char index_file[PROMPTLIB_PATH_MAX];
-    char temp_file[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_BODY_MAX];
+    char index_file[PP_PATH_MAX];
+    char temp_file[PP_PATH_MAX];
+    char line[PP_BODY_MAX];
     FILE *input;
     FILE *output;
 
@@ -2565,10 +2565,10 @@ static int update_registry_references(const char *root, const char *kind, const 
     }
 
     while (fgets(line, sizeof(line), input) != NULL) {
-        char row_line[PROMPTLIB_BODY_MAX];
-        char metadata_file[PROMPTLIB_PATH_MAX];
-        char description[PROMPTLIB_FIELD_MAX] = "";
-        char current_version[PROMPTLIB_FIELD_MAX] = "1";
+        char row_line[PP_BODY_MAX];
+        char metadata_file[PP_PATH_MAX];
+        char description[PP_FIELD_MAX] = "";
+        char current_version[PP_FIELD_MAX] = "1";
         struct prompt_index_row row;
         int changed = 0;
 
@@ -2619,7 +2619,7 @@ static int update_registry_references(const char *root, const char *kind, const 
 }
 
 static int run_registry_command(int argc, char **argv, const char *kind) {
-    char root[PROMPTLIB_PATH_MAX];
+    char root[PP_PATH_MAX];
     const char *action = NULL;
     const char *name = NULL;
     const char *to = NULL;
@@ -2714,9 +2714,9 @@ static int run_registry_command(int argc, char **argv, const char *kind) {
     }
 
     if (strcmp(action, "rename") == 0) {
-        char prompts_dir[PROMPTLIB_PATH_MAX];
-        char from_dir[PROMPTLIB_PATH_MAX];
-        char to_dir[PROMPTLIB_PATH_MAX];
+        char prompts_dir[PP_PATH_MAX];
+        char from_dir[PP_PATH_MAX];
+        char to_dir[PP_PATH_MAX];
 
         if (to == NULL || to[0] == '\0') {
             fprintf(stderr, "Missing --to <name>.\n");
@@ -2753,8 +2753,8 @@ static int run_registry_command(int argc, char **argv, const char *kind) {
 
 static int export_library(const char *source_root, const char *destination_root,
                           const char *folder_filter) {
-    char index_file[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_BODY_MAX];
+    char index_file[PP_PATH_MAX];
+    char line[PP_BODY_MAX];
     FILE *file;
     int exported = 0;
 
@@ -2802,7 +2802,7 @@ static int export_library(const char *source_root, const char *destination_root,
 }
 
 static int run_export(int argc, char **argv) {
-    char root[PROMPTLIB_PATH_MAX];
+    char root[PP_PATH_MAX];
     const char *root_arg = NULL;
     const char *out = NULL;
     const char *folder = NULL;
@@ -2856,7 +2856,7 @@ static int run_export(int argc, char **argv) {
 }
 
 static int run_backup(int argc, char **argv) {
-    char root[PROMPTLIB_PATH_MAX];
+    char root[PP_PATH_MAX];
     const char *root_arg = NULL;
     const char *out = NULL;
     int index;
@@ -2901,9 +2901,9 @@ static int run_backup(int argc, char **argv) {
 }
 
 static int run_import(int argc, char **argv) {
-    char root[PROMPTLIB_PATH_MAX];
-    char source_index[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_BODY_MAX];
+    char root[PP_PATH_MAX];
+    char source_index[PP_PATH_MAX];
+    char line[PP_BODY_MAX];
     const char *source = NULL;
     const char *root_arg = NULL;
     const char *conflict = "skip";
@@ -3013,9 +3013,9 @@ static int is_planned_command(const char *arg) {
 }
 
 static int run_browse(int argc, char **argv) {
-    char root[PROMPTLIB_PATH_MAX];
-    char index_file[PROMPTLIB_PATH_MAX];
-    char line[PROMPTLIB_BODY_MAX];
+    char root[PP_PATH_MAX];
+    char index_file[PP_PATH_MAX];
+    char line[PP_BODY_MAX];
     /* body vars used in macros */
     char *items[4096];
     int item_count;
@@ -3069,7 +3069,7 @@ static int run_browse(int argc, char **argv) {
 
     item_count = 0;
     while (fgets(line, sizeof(line), file) != NULL && item_count < 4096) {
-        char row_line[PROMPTLIB_BODY_MAX];
+        char row_line[PP_BODY_MAX];
         struct prompt_index_row row;
 
         snprintf(row_line, sizeof(row_line), "%s", line);
@@ -3138,7 +3138,7 @@ static int run_browse(int argc, char **argv) {
                      argv[0], root);
 
             /* Temporarily write input to temp file for fzf */
-            char temp_input[PROMPTLIB_PATH_MAX];
+            char temp_input[PP_PATH_MAX];
             if (GetTempPathA(sizeof(temp_input), temp_input) == 0) {
                 fprintf(stderr, "Could not get temp path.\n");
                 for (i = 0; i < item_count; ++i)
@@ -3350,7 +3350,7 @@ static int run_browse(int argc, char **argv) {
     return 0;
 }
 
-int promptlib_cli_run(int argc, char **argv) {
+int pp_cli_run(int argc, char **argv) {
     if (argc <= 1 || is_help_flag(argv[1])) {
         print_help();
         return 0;
@@ -3424,6 +3424,6 @@ int promptlib_cli_run(int argc, char **argv) {
     }
 
     fprintf(stderr, "Unknown command: %s\n", argv[1]);
-    fprintf(stderr, "Run 'promptlib --help' for usage.\n");
+    fprintf(stderr, "Run 'pp--help' for usage.\n");
     return 1;
 }

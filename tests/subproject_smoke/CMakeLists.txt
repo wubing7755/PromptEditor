@@ -2,29 +2,29 @@ cmake_minimum_required(VERSION 3.21)
 
 project(PromptEditorSubprojectSmoke LANGUAGES C)
 
-if(NOT DEFINED PROMPTEDITOR_SOURCE_DIR)
-    message(FATAL_ERROR "PROMPTEDITOR_SOURCE_DIR must point at the template source tree")
+if(NOT DEFINED PP_SOURCE_DIR)
+    message(FATAL_ERROR "PP_SOURCE_DIR must point at the template source tree")
 endif()
 
-add_subdirectory("${PROMPTEDITOR_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/prompteditor-standard")
+add_subdirectory("${PP_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/pp-standard")
 
 if(NOT TARGET PromptEditor::prompteditor_core)
     message(FATAL_ERROR "Expected PromptEditor::prompteditor_core alias target")
 endif()
 
 foreach(option_name IN ITEMS
-        PROMPTEDITOR_BUILD_EXAMPLE
-        PROMPTEDITOR_BUILD_TESTING
-        PROMPTEDITOR_INSTALL)
+        PP_BUILD_EXAMPLE
+        PP_BUILD_TESTING
+        PP_INSTALL)
     if(${option_name})
         message(FATAL_ERROR "${option_name} should default to OFF for subproject builds")
     endif()
 endforeach()
 
 foreach(target_name IN ITEMS
-        prompteditor
-        prompteditor_tests
-        prompteditor_tests)
+        pp
+        pp_tests
+        pp_tests)
     if(TARGET ${target_name})
         message(FATAL_ERROR "${target_name} should not be created by default for subproject builds")
     endif()

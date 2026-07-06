@@ -184,7 +184,7 @@ jobs:
           -G Ninja
           -S tests/subproject_smoke
           -B build/subproject-smoke
-          -DPROMPTEDITOR_SOURCE_DIR=${{ github.workspace }}
+          -DPP_SOURCE_DIR=${{ github.workspace }}
 
       - name: Build subproject smoke
         run: cmake --build build/subproject-smoke --config Debug

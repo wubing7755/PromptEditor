@@ -1,5 +1,9 @@
 # C Project Standard
 
+> **Note:** This is the upstream engineering standard from which PromptEditor was
+> scaffolded. It serves as reference documentation for the conventions used by
+> this project. For project-specific documentation, see [doc/README.md](doc/README.md).
+
 This document defines a pragmatic baseline for small and medium C projects.
 
 ## Core Principles
@@ -154,8 +158,7 @@ Keep local docs short:
   troubleshooting.
 - `doc/guides/testing.md` for test layers and expectations.
 - `doc/guides/release.md` for release steps.
-- `doc/guides/template.md` for rename and trim guidance.
-- `doc/guides/ai-agent.md` for AI-assisted contribution rules.
+- `AGENTS.md` for AI agent policy and contribution rules.
 - `doc/adr/README.md` for architecture decisions.
 - `AGENTS.md` for AI-agent instructions.
 

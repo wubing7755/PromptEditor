@@ -1,30 +1,28 @@
-# Documentation
+# Documentation Index
 
-Keep repository documentation short and useful.
+The canonical map of all project documentation.
 
-## Source Of Truth
+## Project-Specific
 
-- [guides/environment.md](guides/environment.md) guides first-time setup of
-  compilation tools on Windows, Linux, and macOS.
-- [guides/cmake.md](guides/cmake.md) explains configure, build, install,
-  presets, package consumption, subproject consumption, and common CMake errors.
-- [guides/testing.md](guides/testing.md) describes test layers, static analysis,
-  and smoke-test policy.
-- [guides/template.md](guides/template.md) describes how to rename, trim, and
-  reuse the template.
-- [guides/release.md](guides/release.md) describes release preparation.
-- [guides/ai-agent.md](guides/ai-agent.md) describes AI-assisted contribution
-  rules and workflows.
-- [adr/README.md](adr/README.md) describes architecture decision records.
-- [adr/0001-c11-cmake-toolchain-policy.md](adr/0001-c11-cmake-toolchain-policy.md)
-  records the language standard and cross-platform toolchain policy.
+- [MVP Feature Tracking](mvp.md) — implemented and planned commands
+- [Storage Format](storage-format.md) — prompt library layout and file format spec
+
+## Contributor Guides
+
+- [Environment Setup](guides/environment.md) — platform prerequisites and tool installation
+- [Build Guide](guides/cmake.md) — CMake presets, workflows, and troubleshooting
+- [Testing Guide](guides/testing.md) — CTest, static analysis, and smoke tests
+- [Release Guide](guides/release.md) — versioning, verification, and packaging
+
+## Architecture
+
+- [ADR Index](adr/README.md) — architecture decision records
+- [ADR 0001](adr/0001-c11-cmake-toolchain-policy.md) — C11 and CMake toolchain policy
 
 ## Root Documents
 
-- [../README.md](../README.md) is the project overview and quick start.
-- [../CONTRIBUTING.md](../CONTRIBUTING.md) describes branch, commit, and PR
-  workflow.
-- [../SECURITY.md](../SECURITY.md) describes vulnerability reporting and
-  dependency handling.
-- [../AGENTS.md](../AGENTS.md) is the AI agent entry point.
-- [../C_PROJECT_STANDARD.md](../C_PROJECT_STANDARD.md) defines the reusable C project standard.
+- [README](../README.md) — project overview and quick start
+- [CONTRIBUTING](../CONTRIBUTING.md) — branch, commit, and PR workflow
+- [AGENTS](../AGENTS.md) — AI agent instructions and policy
+- [SECURITY](../SECURITY.md) — vulnerability reporting
+- [C Project Standard](../C_PROJECT_STANDARD.md) — upstream engineering standard (reference only)

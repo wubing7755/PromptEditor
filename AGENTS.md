@@ -8,7 +8,6 @@ Before changing files, read:
 
 - `CONTRIBUTING.md`
 - `doc/guides/testing.md`
-- `doc/guides/ai-agent.md`
 
 For architecture-sensitive changes, also read:
 
@@ -23,7 +22,7 @@ For build, CI, packaging, release, dependency, or security work, also read:
 
 ## Project Shape
 
-This is a C11 project template using CMake and CTest.
+This is a C11 project using CMake and CTest.
 
 ```text
 include/        Public headers
@@ -63,6 +62,43 @@ On Linux/macOS:
 - Keep CMake target dependencies narrow.
 - Do not add new global state without a documented reason.
 - Do not weaken warnings, tests, or CI to make a change pass.
+
+## AI Agent Policy
+
+### Appropriate Uses
+
+- Focused bug fixes.
+- Test additions.
+- Documentation updates.
+- Build and CI maintenance.
+- Mechanical refactors that preserve behavior.
+
+### Restricted Uses
+
+AI agents should not independently:
+
+- Redesign core architecture without maintainer direction.
+- Weaken tests, warnings, static analysis, or CI.
+- Add large dependencies or generated code without approval.
+- Publish releases, rotate credentials, or change repository permissions.
+
+### Disclosure
+
+PRs should disclose meaningful AI assistance: list docs read, summarize changes,
+and record validation performed.
+
+### Playbooks
+
+**General workflow:** Read AGENTS.md and relevant docs, inspect minimal file set,
+make focused changes, run checks, summarize.
+
+**Bug fix:** Reproduce, add regression test, fix smallest owning module, run checks.
+
+**Refactor:** Define preserved behavior, stay within module boundaries, avoid
+mixing features with refactors, run tests covering touched modules.
+
+**CI / build fix:** Inspect failing check, reproduce locally, fix the project cause
+rather than masking the check, keep scripts and presets aligned.
 
 ## Documentation
 

@@ -2,7 +2,7 @@
 
 ## Context
 
-This template should work across Windows, Linux, and macOS without baking one
+This project should work across Windows, Linux, and macOS without baking one
 developer's IDE, compiler installation path, or generator choice into shared
 project files. Editors and language servers also need a reliable way to discover
 the same include directories and language mode used by the build.
