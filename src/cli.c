@@ -1439,7 +1439,13 @@ static int spawn_editor(const char *current_content, char *out, size_t out_size)
 
     editor = getenv("EDITOR");
     if (editor == NULL || editor[0] == '\0') {
-        editor = "notepad";
+        /* Prefer a Markdown-capable editor for .md files.
+         * Try VS Code first, fall back to notepad. */
+        if (system("where code >NUL 2>&1") == 0) {
+            editor = "code --wait";
+        } else {
+            editor = "notepad";
+        }
     }
 
     tmp_len = GetTempPathA(sizeof(tmp_dir), tmp_dir);
