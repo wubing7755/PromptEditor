@@ -537,7 +537,10 @@ static int default_root(char *out, size_t out_size) {
     }
 
     /*
-     * 3. Fall back to ~/.promptlib.
+     * 3. Fall back to the user's home directory.  init_library() (and
+     *    every other path) creates .promptlib/ *inside* the resolved
+     *    root, so the root must be the parent directory — not the
+     *    .promptlib directory itself.
      */
 #ifdef _WIN32
     home = getenv("USERPROFILE");
@@ -551,7 +554,7 @@ static int default_root(char *out, size_t out_size) {
         return 0;
     }
 
-    return join_path(out, out_size, home, ".promptlib");
+    return snprintf(out, out_size, "%s", home) > 0 && strlen(out) < out_size;
 }
 
 static int resolve_root_arg(int start_index, int argc, char **argv, char *out, size_t out_size) {
