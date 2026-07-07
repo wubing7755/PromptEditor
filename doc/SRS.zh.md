@@ -100,7 +100,7 @@ stateDiagram-v2
     state Versioned {
         [*] --> Snapshot
         Snapshot --> Promoted: pp optimize --promote
-        Promoted --> Current: (复制到 current.txt)
+        Promoted --> Current: (复制到 current.md)
     }
 ```
 
@@ -410,7 +410,7 @@ Title  添加 prompt
 Desc   保存新 prompt，生成稳定 ID 并写入正文、元数据和索引。按 [§3.21] 验证。
 Given  已初始化的库和 pp add --title "Hello World" --body "Say hello."
 When   命令执行
-Then   在 prompts/inbox/<slug>-<hash>/ 创建目录含 current.txt 和 metadata.tsv
+Then   在 prompts/inbox/<slug>-<hash>/ 创建目录含 current.md 和 metadata.tsv
        （id、title、folder=inbox、category=general、时间戳、current_version=1）；
        index.tsv 追加一行；标准输出 "Saved prompt: <id>"；退出码 0
 ```
@@ -1061,10 +1061,10 @@ pp optimize hello-world-a1b2 --compare 0002
 
 ```
 Title  创建优化版本
-Desc   在 versions/ 下创建新版本快照，不修改 current.txt。
+Desc   在 versions/ 下创建新版本快照，不修改 current.md。
 Given  当前版本 1（正文 "Original"）
 When   执行 pp optimize <id> --body "Improved" --note "Better wording"
-Then   versions/0002.txt="Improved"；versions/index.tsv 追加；current.txt 不变；
+Then   versions/0002.md="Improved"；versions/index.tsv 追加；current.md 不变；
        标准输出 "Created optimized version: 0002"；退出码 0
 ```
 
@@ -1086,10 +1086,10 @@ Then   标准错误: "Missing required option: --body."；退出码 1
 
 ```
 Title  晋升版本
-Desc   --promote 创建版本并复制到 current.txt。
+Desc   --promote 创建版本并复制到 current.md。
 Given  当前版本 1
 When   执行 pp optimize <id> --body "Promoted" --promote
-Then   current.txt="Promoted"；current_version=0002；标准输出 "Created and promoted
+Then   current.md="Promoted"；current_version=0002；标准输出 "Created and promoted
        optimized version: 0002"；退出码 0
 ```
 
@@ -1568,9 +1568,9 @@ Then   有效 JSON: {prompts, folders, categories, tags, versions, archived,
 ```
 Title  原子文件写入
 Desc   所有替换已有内容的文件写入使用"先写临时文件再 rename"模式。
-Given  对 current.txt 执行文件写入
+Given  对 current.md 执行文件写入
 When   写入执行
-Then   内容先写 current.txt.tmp；成功后通过 rename() 替换原文件
+Then   内容先写 current.md.tmp；成功后通过 rename() 替换原文件
 ```
 
 ---
@@ -1934,8 +1934,8 @@ graph TD
         M[".promptlib/"] --> V["version"] & I["index.tsv"] & F["folders.tsv"] & C["categories.tsv"]
         P["prompts/"] --> FD["&lt;folder&gt;/"]
         FD --> PR["&lt;prompt-id&gt;/"]
-        PR --> CT["current.txt"] & MT["metadata.tsv"] & VD["versions/"]
-        VD --> VI["index.tsv"] & VB["NNNN.txt"] & VM["NNNN.tsv"]
+        PR --> CT["current.md"] & MT["metadata.tsv"] & VD["versions/"]
+        VD --> VI["index.tsv"] & VB["NNNN.md"] & VM["NNNN.tsv"]
         A["archive/"] --> AP["&lt;prompt-id&gt;/"]
     end
 ```
