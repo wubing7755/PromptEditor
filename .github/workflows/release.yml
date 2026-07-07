@@ -1,0 +1,152 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. v0.2.0)'
+        required: true
+        default: 'v0.2.0'
+
+permissions:
+  contents: write
+
+jobs:
+
+  # ── Windows ──────────────────────────────────────────────────────────
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v6
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install Inno Setup
+        shell: powershell
+        run: |
+          choco install innosetup --no-progress -y
+          Write-Host "ISCC:"
+          Get-ChildItem "C:\Program Files*\Inno Setup*\ISCC.exe" -Recurse -ErrorAction SilentlyContinue
+
+      - name: Build (release)
+        shell: powershell
+        run: |
+          cmake --preset ninja-release
+          cmake --build --preset ninja-release
+
+      - name: Test
+        shell: powershell
+        run: ctest --preset ninja-release --output-on-failure
+
+      - name: Package binary
+        shell: powershell
+        run: .\scripts\release.ps1 -SkipTests
+
+      - name: Build installer
+        shell: powershell
+        run: .\scripts\package.ps1 -SkipBuild
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: windows-release
+          path: |
+            dist/pp-setup-*.exe
+            dist/pp-*-windows-*.zip
+          if-no-files-found: error
+
+  # ── Linux ────────────────────────────────────────────────────────────
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v6
+
+      - name: Install packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev
+
+      - name: Build (release)
+        run: |
+          cmake --preset ninja-release
+          cmake --build --preset ninja-release
+
+      - name: Test
+        run: ctest --preset ninja-release --output-on-failure
+
+      - name: Package binary
+        run: ./scripts/release.sh --skip-tests
+
+      - name: Build .deb installer
+        run: ./scripts/package.sh --skip-build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: linux-release
+          path: |
+            dist/pp_*_amd64.deb
+            dist/pp-*-linux*.tar.gz
+          if-no-files-found: error
+
+  # ── macOS ────────────────────────────────────────────────────────────
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v6
+
+      - name: Build (release)
+        run: |
+          cmake --preset ninja-release
+          cmake --build --preset ninja-release
+
+      - name: Test
+        run: ctest --preset ninja-release --output-on-failure
+
+      - name: Package binary
+        run: ./scripts/release.sh --skip-tests
+
+      - name: Build .dmg installer
+        run: ./scripts/package.sh --skip-build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: macos-release
+          path: |
+            dist/pp-*.dmg
+            dist/pp-*-macos*.tar.gz
+          if-no-files-found: error
+
+  # ── GitHub Release ──────────────────────────────────────────────────
+  publish:
+    needs: [windows, linux, macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Show files
+        run: ls -la dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true
