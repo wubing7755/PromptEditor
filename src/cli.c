@@ -22,6 +22,7 @@
 #endif
 #include <process.h>
 #define getpid _getpid
+#define getcwd _getcwd
 #else
 #include <unistd.h>
 #define mkdir_one(path) mkdir((path), 0755)
@@ -66,7 +67,7 @@ struct prompt_index_row {
 static int index_file_path(char *out, size_t out_size, const char *root);
 
 static void print_help(void) {
-    puts("Usage: pp<command> [options]");
+    puts("Usage: pp <command> [options]");
     puts("");
     puts("Commands:");
     puts("  init       Initialize a prompt library folder");
@@ -88,11 +89,11 @@ static void print_help(void) {
     puts("  -h, --help       Show this help");
     puts("  -v, --version    Show version");
     puts("");
-    puts("Run 'pp<command> --help' for command-specific usage.");
+    puts("Run 'pp <command> --help' for command-specific usage.");
 }
 
 static void print_init_help(void) {
-    puts("Usage: ppinit [--root <path>]");
+    puts("Usage: pp init [--root <path>]");
     puts("");
     puts("Initializes a prompt library folder.");
     puts("");
@@ -102,7 +103,7 @@ static void print_init_help(void) {
 }
 
 static void print_add_help(void) {
-    puts("Usage: ppadd --title <text> --body <text> [options]");
+    puts("Usage: pp add --title <text> --body <text> [options]");
     puts("");
     puts("Options:");
     puts("  --root <path>          Library root");
@@ -116,7 +117,7 @@ static void print_add_help(void) {
 }
 
 static void print_list_help(void) {
-    puts("Usage: pplist [--root <path>] [filters] [--json] [--no-pager]");
+    puts("Usage: pp list [--root <path>] [filters] [--json] [--no-pager]");
     puts("");
     puts("Options:");
     puts("  --root <path>          Library root");
@@ -128,7 +129,7 @@ static void print_list_help(void) {
 }
 
 static void print_show_help(void) {
-    puts("Usage: ppshow <id-or-title> [--root <path>] [--raw] [--json]");
+    puts("Usage: pp show <id-or-title> [--root <path>] [--raw] [--json]");
     puts("");
     puts("Options:");
     puts("  --root <path>          Library root");
@@ -137,7 +138,7 @@ static void print_show_help(void) {
 }
 
 static void print_search_help(void) {
-    puts("Usage: ppsearch <query> [--root <path>] [filters] [--raw] [--json]");
+    puts("Usage: pp search <query> [--root <path>] [filters] [--raw] [--json]");
     puts("");
     puts("Options:");
     puts("  --root <path>          Library root");
@@ -148,7 +149,7 @@ static void print_search_help(void) {
 }
 
 static void print_edit_help(void) {
-    puts("Usage: ppedit <id-or-title> [--root <path>] [options]");
+    puts("Usage: pp edit <id-or-title> [--root <path>] [options]");
     puts("");
     puts("If no --body, --category, --tag, --description, --title, or --folder is given,");
     puts("the editor opens for editing the prompt body.");
@@ -163,7 +164,7 @@ static void print_edit_help(void) {
 }
 
 static void print_browse_help(void) {
-    puts("Usage: ppbrowse [--root <path>] [filters]");
+    puts("Usage: pp browse [--root <path>] [filters]");
     puts("");
     puts("Opens an interactive prompt browser.");
     puts("If fzf is installed, it is used for fuzzy filtering with a preview window.");
@@ -181,13 +182,13 @@ static void print_browse_help(void) {
 }
 
 static void print_delete_help(void) {
-    puts("Usage: ppdelete <id-or-title> [--root <path>] [--yes]");
+    puts("Usage: pp delete <id-or-title> [--root <path>] [--yes]");
     puts("");
     puts("Deletes are archived by default. Pass --yes to confirm.");
 }
 
 static void print_optimize_help(void) {
-    puts("Usage: ppoptimize <id-or-title> [--root <path>] [options]");
+    puts("Usage: pp optimize <id-or-title> [--root <path>] [options]");
     puts("");
     puts("Options:");
     puts("  --body <text>          Optimized prompt body");
@@ -198,7 +199,7 @@ static void print_optimize_help(void) {
 }
 
 static void print_folder_help(void) {
-    puts("Usage: ppfolder <list|create|remove|rename> [name] [options]");
+    puts("Usage: pp folder <list|create|remove|rename> [name] [options]");
     puts("");
     puts("Options:");
     puts("  --root <path>          Library root");
@@ -207,7 +208,7 @@ static void print_folder_help(void) {
 }
 
 static void print_category_help(void) {
-    puts("Usage: ppcategory <list|create|remove|rename> [name] [options]");
+    puts("Usage: pp category <list|create|remove|rename> [name] [options]");
     puts("");
     puts("Options:");
     puts("  --root <path>          Library root");
@@ -216,15 +217,15 @@ static void print_category_help(void) {
 }
 
 static void print_export_help(void) {
-    puts("Usage: ppexport --out <path> [--root <path>] [--folder <path>]");
+    puts("Usage: pp export --out <path> [--root <path>] [--folder <path>]");
 }
 
 static void print_import_help(void) {
-    puts("Usage: ppimport <path> [--root <path>] [--on-conflict skip|replace]");
+    puts("Usage: pp import <path> [--root <path>] [--on-conflict skip|replace]");
 }
 
 static void print_backup_help(void) {
-    puts("Usage: ppbackup --out <path> [--root <path>]");
+    puts("Usage: pp backup --out <path> [--root <path>]");
 }
 
 static void print_version(void) {
@@ -476,12 +477,68 @@ static int copy_file_if_exists(const char *source, const char *destination) {
 static int default_root(char *out, size_t out_size) {
     const char *root_env;
     const char *home;
+    char cwd[PP_PATH_MAX];
+    char test[PP_PATH_MAX];
 
+    /*
+     * 1. Walk up from the current directory looking for .promptlib/.
+     *    This mirrors how git discovers a repository and makes the
+     *    common case friction-free: cd into a library and run pp.
+     */
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        char *scan = cwd;
+
+        for (;;) {
+            struct stat info;
+            char *sep;
+#ifdef _WIN32
+            char *sep_bs;
+#endif
+
+            {
+                int len = snprintf(test, sizeof(test), "%s/.promptlib", scan);
+                if (len <= 0 || (size_t)len >= sizeof(test)) {
+                    break;
+                }
+            }
+            if (stat(test, &info) == 0 && (info.st_mode & S_IFDIR)) {
+                return snprintf(out, out_size, "%s", scan) > 0 && strlen(out) < out_size;
+            }
+
+            sep = strrchr(scan, '/');
+#ifdef _WIN32
+            sep_bs = strrchr(scan, '\\');
+            if (sep_bs > sep) {
+                sep = sep_bs;
+            }
+#endif
+            if (sep == NULL) {
+                break;
+            }
+            *sep = '\0';
+            if (strlen(scan) == 0) {
+                break;
+            }
+#ifdef _WIN32
+            /* Stop at drive root, e.g. "C:" */
+            if (strlen(scan) == 2 && scan[1] == ':') {
+                break;
+            }
+#endif
+        }
+    }
+
+    /*
+     * 2. Honour PROMPTLIB_ROOT environment variable.
+     */
     root_env = getenv("PROMPTLIB_ROOT");
     if (root_env != NULL && root_env[0] != '\0') {
         return snprintf(out, out_size, "%s", root_env) > 0 && strlen(out) < out_size;
     }
 
+    /*
+     * 3. Fall back to ~/.promptlib.
+     */
 #ifdef _WIN32
     home = getenv("USERPROFILE");
 #else
@@ -559,7 +616,7 @@ static int validate_library_root(const char *root) {
     if (!path_exists_as_dir(root) || !path_exists_as_dir(meta_dir) ||
         !path_exists_as_dir(prompts_dir) || !path_exists_as_file(index_file)) {
         fprintf(stderr, "Invalid prompt library root: %s\n", root);
-        fprintf(stderr, "Run 'ppinit --root %s' first.\n", root);
+        fprintf(stderr, "Run 'pp init --root %s' first.\n", root);
         return 0;
     }
 
@@ -3424,6 +3481,6 @@ int pp_cli_run(int argc, char **argv) {
     }
 
     fprintf(stderr, "Unknown command: %s\n", argv[1]);
-    fprintf(stderr, "Run 'pp--help' for usage.\n");
+    fprintf(stderr, "Run 'pp --help' for usage.\n");
     return 1;
 }
