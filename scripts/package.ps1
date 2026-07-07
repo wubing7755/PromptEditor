@@ -95,7 +95,7 @@ Write-Host "  Script:   $issFile"
 Write-Host ""
 
 Write-Host "--- Compiling installer ---"
-$args = @("/DAppVersion=$Version", "/DSourceDir=$DistDir", $issFile)
+$args = @("/DAppVersion=$Version", $issFile)
 & $iscc @args
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: Inno Setup compilation failed." -ForegroundColor Red

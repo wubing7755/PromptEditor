@@ -22,7 +22,7 @@
 #endif
 
 #ifndef SourceDir
-#define SourceDir   "dist"
+#define SourceDir   "..\dist"
 #endif
 
 [Setup]
@@ -39,7 +39,7 @@ DefaultGroupName={#AppName}
 AllowNoIcons=yes
 
 ; Output file name
-OutputDir=dist
+OutputDir=..\dist
 OutputBaseFilename=pp-setup-{#AppVersion}
 
 ; Compression
@@ -51,6 +51,7 @@ WizardStyle=modern
 WizardSizePercent=120,120
 
 ; Privileges — user can choose per-user or all-users
+PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 UsePreviousPrivileges=yes
 ArchitecturesInstallIn64BitMode=x64compatible
