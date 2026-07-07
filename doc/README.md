@@ -4,15 +4,17 @@ The canonical map of all project documentation.
 
 ## Project-Specific
 
-- [MVP Feature Tracking](mvp.md) — implemented and planned commands
-- [Storage Format](storage-format.md) — prompt library layout and file format spec
+- [MVP Feature Tracking](mvp.md) — command surface and implementation status
+- [Storage Format](storage-format.md) — prompt library layout and file format specification
+- [SRS (English)](SRS.md) — software requirements specification (136 requirements)
+- [SRS (中文)](SRS.zh.md) — 软件需求规范（136 条需求）
 
 ## Contributor Guides
 
 - [Environment Setup](guides/environment.md) — platform prerequisites and tool installation
 - [Build Guide](guides/cmake.md) — CMake presets, workflows, and troubleshooting
 - [Testing Guide](guides/testing.md) — CTest, static analysis, and smoke tests
-- [Release Guide](guides/release.md) — versioning, verification, and packaging
+- [Release Guide](guides/release.md) — versioning, local and CI release procedures
 
 ## Architecture
 

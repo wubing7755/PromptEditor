@@ -503,6 +503,34 @@ Then   标准错误指示不支持的字符；退出码 1；prompt 未创建
 
 ---
 
+### REQ-F-020 🔴 [System]
+
+```
+Title  Prompt ID 生成
+Desc   ID 通过对标题进行 slug 化（转为小写字母数字，非字母数字 → "-"，去除首尾连字符），
+       再拼接 "-" + djb2 哈希值的末 4 位十六进制数来生成。空 slug → "p"。
+Given  标题 "Hello World! 2024" → "hello-world-2024-a1b2"；标题 "!!!" → "p-c3d4"
+When   pp add 生成 ID
+Then   ID 稳定（相同标题 → 相同 ID）、小写、≤ 128 字符、每个标题唯一
+```
+
+---
+
+### REQ-F-021 🔴 [System]
+
+```
+Title  默认元数据赋值
+Desc   省略 --folder 时默认 "inbox"；省略 --category 时默认 "general"；
+       省略标签时默认空；省略描述时默认空。created_at / updated_at 设为当前 UTC 时间戳；
+       current_version = 1。
+Given  pp add --title "T" --body "B" 不传可选标志
+When   prompt 保存
+Then   metadata.tsv：folder=inbox、category=general、无 tag 行、无 description 行，
+       created_at/updated_at 已填充、current_version=1
+```
+
+---
+
 ### 3.5 list — 列出 Prompt
 
 | 选项 | 描述 |
@@ -601,6 +629,21 @@ Desc   多个过滤标志以 AND 逻辑组合。
 Given  各种文件夹/分类/标签组合
 When   pp list --folder work --tag urgent
 Then   仅显示匹配所有过滤条件的 prompt
+```
+
+---
+
+### REQ-F-029 🟡 [Any User]
+
+```
+Title  列出空库
+Desc   库中无 prompt 时显示占位消息。
+Given  库中有零个 prompt
+When   执行 pp list
+Then   标准输出: "(empty)"；退出码 0
+--
+Given  空库执行 pp list --json
+Then   标准输出: "[\n\n]"（空 JSON 数组）；退出码 0
 ```
 
 ---
@@ -1982,8 +2025,8 @@ PP_API const char *pp_platform_name(void);
 | 001–004 | 全局 CLI | 4 |
 | 005–008 | 根目录发现 | 4 |
 | 009–011 | init | 3 |
-| 012–019 | add | 8 |
-| 022–028 | list | 7 |
+| 012–021 | add | 10 |
+| 022–029 | list | 8 |
 | 030–033 | show | 4 |
 | 034–039 | edit | 6 |
 | 040–042 | delete | 3 |
@@ -2007,7 +2050,7 @@ PP_API const char *pp_platform_name(void);
 | 105–113 | 构建 | 9 |
 | 114–117 | 测试 | 4 |
 | 118–121 | 静态分析 | 4 |
-| **总计** | | **133** |
+| **总计** | | **136** |
 
 ### 7.2 按角色的需求视图
 
@@ -2025,6 +2068,8 @@ PP_API const char *pp_platform_name(void);
 
 ### 7.3 已规划需求
 
+以下需求已写入规范但从当前发布中延后：
+
 | ID | 优先级 | 命令 | 标题 |
 |----|:--:|------|------|
 | REQ-F-043 | 🟢 | delete | 永久删除 (`--permanent`) |
@@ -2032,15 +2077,10 @@ PP_API const char *pp_platform_name(void);
 | REQ-F-074 | 🟢 | export | 按分类导出 |
 | REQ-F-075 | 🟢 | export | 压缩归档导出 |
 | REQ-F-080 | 🟢 | import | 导入冲突重命名 |
-| REQ-F-125 | 🟡 | archive | 列出已归档 prompt |
-| REQ-F-126 | 🟡 | archive | 恢复已归档 prompt |
-| REQ-F-127 | 🟡 | archive | 永久清除已归档 prompt |
-| REQ-F-128 | 🟡 | tag | 添加标签 |
-| REQ-F-129 | 🟡 | tag | 移除标签 |
-| REQ-F-130 | 🟡 | tag | 列出 prompt 标签 |
-| REQ-F-131 | 🔴 | reindex | 从元数据重建索引 |
-| REQ-F-132 | 🟡 | reindex | 重建索引预演 |
-| REQ-F-133 | 🟢 | stats | 显示库统计信息 |
+
+> **说明：** REQ‑F‑125 至 REQ‑F‑133（`archive`、`tag`、`reindex`、`stats` 命令）
+> 分别在 §3.9、§3.15、§3.19 和 §3.20 中定义。其 ID 非连续编号，因为它们
+> 是在最初 121 条需求的基准上新增的扩展需求。
 
 ### 7.4 可追溯性矩阵
 
