@@ -105,51 +105,39 @@ Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environmen
     Tasks: addtopath
 
 [Code]
-// --- Custom path removal helper ---
-function RemoveFromPath(const Path, Entry: string): string;
-var
-  Parts: TArrayOfString;
-  i: Integer;
-begin
-  Result := '';
-  Parts := SplitString(Path, ';');
-  for i := 0 to GetArrayLength(Parts) - 1 do
-  begin
-    if Trim(Parts[i]) = Trim(Entry) then
-      Continue;
-    if Result <> '' then
-      Result := Result + ';';
-    Result := Result + Parts[i];
-  end;
-end;
-
-// --- Uninstall: remove from PATH ---
+// --- Uninstall: remove app directory from PATH ---
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
-  CurrentPath: string;
-  NewPath: string;
+  AppDir, CurrentPath, NewPath: string;
 begin
   if CurUninstallStep = usPostUninstall then
   begin
-    // Remove from user PATH
+    AppDir := ExpandConstant('{app}');
+
+    // Clean user PATH
     if RegQueryStringValue(HKCU, 'Environment', 'Path', CurrentPath) then
     begin
-      NewPath := RemoveFromPath(CurrentPath, ExpandConstant('{app}'));
-      if NewPath <> CurrentPath then
+      NewPath := CurrentPath;
+      StringChange(NewPath, ';' + AppDir + ';', ';');
+      StringChange(NewPath, AppDir + ';', '');
+      StringChange(NewPath, ';' + AppDir, '');
+      if (NewPath <> AppDir) and (NewPath <> CurrentPath) then
         RegWriteStringValue(HKCU, 'Environment', 'Path', NewPath);
     end;
-    // Remove from system PATH (if we had admin)
-    if RegQueryStringValue(HKLM, 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'Path', CurrentPath) then
+
+    // Clean system PATH
+    if RegQueryStringValue(HKLM,
+      'SYSTEM\CurrentControlSet\Control\Session Manager\Environment',
+      'Path', CurrentPath) then
     begin
-      NewPath := RemoveFromPath(CurrentPath, ExpandConstant('{app}'));
-      if NewPath <> CurrentPath then
-        RegWriteStringValue(HKLM, 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'Path', NewPath);
+      NewPath := CurrentPath;
+      StringChange(NewPath, ';' + AppDir + ';', ';');
+      StringChange(NewPath, AppDir + ';', '');
+      StringChange(NewPath, ';' + AppDir, '');
+      if (NewPath <> AppDir) and (NewPath <> CurrentPath) then
+        RegWriteStringValue(HKLM,
+          'SYSTEM\CurrentControlSet\Control\Session Manager\Environment',
+          'Path', NewPath);
     end;
   end;
-end;
-
-// --- Welcome message ---
-function InitializeWizard: Boolean;
-begin
-  Result := True;
 end;
