@@ -160,7 +160,6 @@ Keep local docs short:
 - `doc/guides/release.md` for release steps.
 - `AGENTS.md` for AI agent policy and contribution rules.
 - `doc/adr/README.md` for architecture decisions.
-- `AGENTS.md` for AI-agent instructions.
 
 ## Avoid By Default
 
