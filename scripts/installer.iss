@@ -21,7 +21,9 @@
 #define AppVersion "0.1.0"
 #endif
 
+#ifndef SourceDir
 #define SourceDir   "dist"
+#endif
 
 [Setup]
 AppId={{B8F4A3D2-7E1C-4A5B-9F6D-1C2E3A4B5C6D}
