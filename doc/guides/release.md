@@ -1,6 +1,6 @@
 # Release
 
-This template does not prescribe a release tool. A typical release should:
+This project does not prescribe a release tool. A typical release should:
 
 1. Update version metadata.
 2. Run `./scripts/check.sh --preset ninja-release` (or `./scripts/check.ps1 -Preset ninja-release` on Windows PowerShell).

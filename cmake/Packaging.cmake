@@ -1,7 +1,7 @@
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-set(PROMPTEDITOR_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/PromptEditor")
+set(PP_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/PromptEditor")
 
 install(TARGETS prompteditor_core
     EXPORT PromptEditorTargets
@@ -14,14 +14,14 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-install(DIRECTORY ${PROMPTEDITOR_GENERATED_INCLUDE_DIR}/
+install(DIRECTORY ${PP_GENERATED_INCLUDE_DIR}/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/PromptEditorConfig.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/PromptEditorConfig.cmake"
-    INSTALL_DESTINATION "${PROMPTEDITOR_INSTALL_CMAKEDIR}"
+    INSTALL_DESTINATION "${PP_INSTALL_CMAKEDIR}"
 )
 
 write_basic_package_version_file(
@@ -32,11 +32,11 @@ write_basic_package_version_file(
 
 install(EXPORT PromptEditorTargets
     NAMESPACE PromptEditor::
-    DESTINATION ${PROMPTEDITOR_INSTALL_CMAKEDIR}
+    DESTINATION ${PP_INSTALL_CMAKEDIR}
 )
 
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/PromptEditorConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/PromptEditorConfigVersion.cmake"
-    DESTINATION ${PROMPTEDITOR_INSTALL_CMAKEDIR}
+    DESTINATION ${PP_INSTALL_CMAKEDIR}
 )

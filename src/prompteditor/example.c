@@ -3,16 +3,16 @@
 
 #include <limits.h>
 
-PromptEditorVersion prompteditor_version(void) {
-    PromptEditorVersion version = {
-        PROMPTEDITOR_VERSION_MAJOR,
-        PROMPTEDITOR_VERSION_MINOR,
-        PROMPTEDITOR_VERSION_PATCH,
+PP_Version pp_version(void) {
+    PP_Version version = {
+        PP_VERSION_MAJOR,
+        PP_VERSION_MINOR,
+        PP_VERSION_PATCH,
     };
     return version;
 }
 
-int prompteditor_add_checked(int left, int right, int *out_value) {
+int pp_add_checked(int left, int right, int *out_value) {
     if (!out_value) {
         return 0;
     }
@@ -25,12 +25,12 @@ int prompteditor_add_checked(int left, int right, int *out_value) {
     return 1;
 }
 
-const char *prompteditor_platform_name(void) {
-#if PROMPTEDITOR_PLATFORM_WINDOWS
+const char *pp_platform_name(void) {
+#if PP_PLATFORM_WINDOWS
     return "windows";
-#elif PROMPTEDITOR_PLATFORM_MACOS
+#elif PP_PLATFORM_MACOS
     return "macos";
-#elif PROMPTEDITOR_PLATFORM_LINUX
+#elif PP_PLATFORM_LINUX
     return "linux";
 #else
     return "unknown";

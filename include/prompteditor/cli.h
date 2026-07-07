@@ -1,6 +1,6 @@
-#ifndef PROMPTLIB_CLI_H
-#define PROMPTLIB_CLI_H
+#ifndef PP_CLI_H
+#define PP_CLI_H
 
-int promptlib_cli_run(int argc, char **argv);
+int pp_cli_run(int argc, char **argv);
 
 #endif

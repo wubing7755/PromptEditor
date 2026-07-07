@@ -22,7 +22,7 @@ retrieving, and improving prompt templates in a local file-backed library.
 
 ## Command Surface
 
-### `promptlib init`
+### `pp init`
 
 Initializes a prompt library root.
 
@@ -33,7 +33,7 @@ Planned options:
 If `--root` is omitted, `PROMPTLIB_ROOT` is used. If that is unset, the command
 uses a default `.promptlib` folder in the current user's home directory.
 
-### `promptlib add`
+### `pp add`
 
 Saves a new prompt.
 
@@ -47,11 +47,12 @@ Implemented options:
 - `--root <path>`: library root.
 - `--tag <name>`: repeatable tag.
 
-    puts("  --editor               Open $EDITOR to enter prompt body");Planned later:
+Planned later:
 
+- `--editor`: Open $EDITOR to enter prompt body.
 - `--file <path>`: read prompt body from a file.
 
-### `promptlib list`
+### `pp list`
 
 Lists prompts.
 
@@ -68,7 +69,7 @@ Planned later:
 
 - `--format table|plain`: choose output shape.
 
-### `promptlib folder <list|create|remove|rename>`
+### `pp folder <list|create|remove|rename>`
 
 Manages folder names in the library.
 
@@ -80,7 +81,7 @@ Implemented options:
 
 Folder remove is blocked while prompts still use the folder.
 
-### `promptlib category <list|create|remove|rename>`
+### `pp category <list|create|remove|rename>`
 
 Manages category names in the library.
 
@@ -92,7 +93,7 @@ Implemented options:
 
 Category remove is blocked while prompts still use the category.
 
-### `promptlib show <id-or-title>`
+### `pp show <id-or-title>`
 
 Displays a prompt.
 
@@ -106,7 +107,7 @@ Planned later:
 
 - `--metadata`: print metadata without body.
 
-### `promptlib edit <id-or-title>`
+### `pp edit <id-or-title>`
 
 Updates prompt metadata or content.
 
@@ -125,7 +126,7 @@ Planned later:
 - `--file <path>`
 - `--remove-tag <name>`
 
-### `promptlib delete <id-or-title>`
+### `pp delete <id-or-title>`
 
 Archives or removes a prompt.
 
@@ -139,7 +140,7 @@ Planned later:
 
 - `--permanent`: permanently remove the prompt file.
 
-### `promptlib search <query>`
+### `pp search <query>`
 
 Searches title, body, description, category, folder, and tags.
 
@@ -156,7 +157,7 @@ Planned later:
 
 - Search prompt descriptions after metadata parsing is centralized.
 
-### `promptlib optimize <id-or-title>`
+### `pp optimize <id-or-title>`
 
 Creates an improved prompt version without overwriting the original.
 
@@ -173,7 +174,7 @@ Planned later:
 
 - `--file <path>`: read optimized body from a file.
 
-### `promptlib export`
+### `pp export`
 
 Exports prompts or a subtree.
 
@@ -188,7 +189,7 @@ Planned later:
 - `--category <name>`
 - compressed archive output.
 
-### `promptlib import <path>`
+### `pp import <path>`
 
 Imports prompts from another library folder or export.
 
@@ -202,7 +203,7 @@ Current conflict strategies:
 - `skip`: default, leaves existing prompts unchanged.
 - `replace`: updates the index and copies imported prompt files.
 
-### `promptlib backup`
+### `pp backup`
 
 Creates a restorable backup of the active library.
 

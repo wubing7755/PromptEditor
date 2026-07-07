@@ -1,5 +1,5 @@
-#ifndef PROMPTEDITOR_COMPILER_H
-#define PROMPTEDITOR_COMPILER_H
+#ifndef PP_COMPILER_H
+#define PP_COMPILER_H
 
 /*
  * Compiler and platform detection macros.
@@ -12,13 +12,13 @@
 /* ---- Compiler family detection ---- */
 
 #if defined(_MSC_VER)
-#define PROMPTEDITOR_COMPILER_MSVC 1
+#define PP_COMPILER_MSVC 1
 #elif defined(__clang__) && defined(__APPLE__)
-#define PROMPTEDITOR_COMPILER_APPLECLANG 1
+#define PP_COMPILER_APPLECLANG 1
 #elif defined(__clang__)
-#define PROMPTEDITOR_COMPILER_CLANG 1
+#define PP_COMPILER_CLANG 1
 #elif defined(__GNUC__)
-#define PROMPTEDITOR_COMPILER_GCC 1
+#define PP_COMPILER_GCC 1
 #else
 #warning "Unknown compiler. Portable macros may not be available."
 #endif
@@ -26,21 +26,21 @@
 /* ---- Platform detection ---- */
 
 #if defined(_WIN32)
-#define PROMPTEDITOR_PLATFORM_WINDOWS 1
+#define PP_PLATFORM_WINDOWS 1
 #elif defined(__APPLE__)
-#define PROMPTEDITOR_PLATFORM_MACOS 1
+#define PP_PLATFORM_MACOS 1
 #elif defined(__linux__)
-#define PROMPTEDITOR_PLATFORM_LINUX 1
+#define PP_PLATFORM_LINUX 1
 #endif
 
 /* ---- Portable function attributes ---- */
 
-#if PROMPTEDITOR_COMPILER_MSVC
-#define PROMPTEDITOR_NORETURN __declspec(noreturn)
-#define PROMPTEDITOR_DEPRECATED(msg) __declspec(deprecated(msg))
+#if PP_COMPILER_MSVC
+#define PP_NORETURN __declspec(noreturn)
+#define PP_DEPRECATED(msg) __declspec(deprecated(msg))
 #else
-#define PROMPTEDITOR_NORETURN __attribute__((__noreturn__))
-#define PROMPTEDITOR_DEPRECATED(msg) __attribute__((__deprecated__(msg)))
+#define PP_NORETURN __attribute__((__noreturn__))
+#define PP_DEPRECATED(msg) __attribute__((__deprecated__(msg)))
 #endif
 
-#endif /* PROMPTEDITOR_COMPILER_H */
+#endif /* PP_COMPILER_H */

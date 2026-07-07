@@ -1,5 +1,5 @@
-#ifndef PROMPTEDITOR_TEST_ASSERT_H
-#define PROMPTEDITOR_TEST_ASSERT_H
+#ifndef PP_TEST_ASSERT_H
+#define PP_TEST_ASSERT_H
 
 #include <stdio.h>
 
@@ -24,7 +24,7 @@ static inline int ct_expect_int_eq(int actual, int expected, const char *actual_
     return 1;
 }
 
-#define PROMPTEDITOR_EXPECT_TRUE(e) ct_expect_true((e), #e, __FILE__, __LINE__)
-#define PROMPTEDITOR_EXPECT_INT_EQ(a, e) ct_expect_int_eq((a), (e), #a, #e, __FILE__, __LINE__)
+#define PP_EXPECT_TRUE(e) ct_expect_true((e), #e, __FILE__, __LINE__)
+#define PP_EXPECT_INT_EQ(a, e) ct_expect_int_eq((a), (e), #a, #e, __FILE__, __LINE__)
 
-#endif /* PROMPTEDITOR_TEST_ASSERT_H */
+#endif /* PP_TEST_ASSERT_H */

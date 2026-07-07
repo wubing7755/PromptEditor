@@ -3,7 +3,7 @@
 int main(void) {
     int value = 0;
 
-    if (!prompteditor_add_checked(4, 5, &value)) {
+    if (!pp_add_checked(4, 5, &value)) {
         return 1;
     }
 

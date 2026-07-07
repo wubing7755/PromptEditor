@@ -6,7 +6,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 
 Push-Location $RepoRoot
 try {
@@ -30,11 +30,9 @@ if (-not $SkipFormat -and (Get-Command clang-format -ErrorAction SilentlyContinu
     $files = Get-ChildItem -Path include,src,tests -Recurse -File -Include *.c,*.h,*.cpp |
         Sort-Object FullName
     if ($files.Count -gt 0) {
-        Invoke-CheckedCommand -Command "clang-format" -Arguments @(
-            "--dry-run",
-            "--Werror",
-            $files.FullName
-        )
+        $clangArgs = @("--dry-run", "--Werror")
+        $clangArgs += $files.FullName
+        Invoke-CheckedCommand -Command "clang-format" -Arguments $clangArgs
     }
 } elseif (-not $SkipFormat) {
     Write-Host "Skipping clang-format: command not found."

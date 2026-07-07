@@ -19,160 +19,34 @@ confirm your environment is ready.
 
 ## Windows
 
-Pick one of the three paths below. Option A (MSVC) is the most tested path in
-CI. Option B (MSYS2/UCRT64) provides a Unix-like shell and GCC/Clang. Option C
-(WSL) delegates to a Linux distribution.
-
-### Option A: Visual Studio Build Tools (MSVC)
-
-Install **Visual Studio Build Tools 2022** or **Visual Studio 2022** from the
-[Visual Studio downloads page](https://visualstudio.microsoft.com/downloads/).
-During installation, select the **Desktop development with C++** workload. This
-provides the MSVC compiler (`cl.exe`), the Windows SDK, and optional CMake and
-Ninja if you enable them in the installer.
-
-If you prefer command-line package management, use winget:
+**Option A (recommended):** Install Visual Studio Build Tools 2022 with the
+"Desktop development with C++" workload. Use "Developer PowerShell" to run
+build commands (MSVC on PATH). Install CMake and Ninja via winget:
 
 ```powershell
-winget install Kitware.CMake
-winget install Ninja-build.Ninja
-winget install LLVM.LLVM
+winget install Kitware.CMake Ninja-build.Ninja
 ```
 
-The LLVM package includes clangd, clang-format, and clang-tidy.
-
-**Important:** A normal PowerShell or Command Prompt does not expose `cl.exe`.
-Launch **Developer PowerShell for VS 2022** or **Developer Command Prompt for
-VS 2022** from the Start Menu before running any build commands. Alternatively,
-use a VS Code CMake kit that initializes the MSVC environment.
-
-### Option B: MSYS2 / UCRT64 (GCC or Clang)
-
-Download and install MSYS2 from [msys2.org](https://www.msys2.org/). Accept
-the default installation path.
-
-Launch **MSYS2 UCRT64** from the Start Menu. This opens a shell configured for
-the Universal C Runtime — the modern Windows C runtime compatible with standard
-C11.
-
-Update the package database first:
+**Option B (MSYS2):** Install [MSYS2](https://www.msys2.org/), launch UCRT64 shell:
 
 ```sh
 pacman -Syu
+pacman -S mingw-w64-ucrt-x86_64-{cmake,ninja,gcc}
 ```
 
-Re-launch the UCRT64 shell if the update requires it, then install the build
-tools:
-
-```sh
-pacman -S mingw-w64-ucrt-x86_64-cmake
-pacman -S mingw-w64-ucrt-x86_64-ninja
-pacman -S mingw-w64-ucrt-x86_64-gcc
-```
-
-To use Clang instead of GCC:
-
-```sh
-pacman -S mingw-w64-ucrt-x86_64-clang
-```
-
-Optional editor tools (clangd, clang-format, clang-tidy):
-
-```sh
-pacman -S mingw-w64-ucrt-x86_64-clang-tools-extra
-```
-
-All tools are available on PATH inside the UCRT64 shell. Git operations work
-from this shell as well, since MSYS2 bundles git.
-
-This option produces native Windows binaries through a Unix-like package
-manager and shell environment.
-
-### Option C: WSL (Windows Subsystem for Linux)
-
-From an elevated PowerShell or Command Prompt:
-
-```powershell
-wsl --install
-```
-
-This installs WSL 2 and a default Ubuntu distribution. Reboot if prompted, then
-launch the installed Linux distribution from the Start Menu. From this point,
-follow the **Linux** section below.
-
-Clone the repository inside the WSL filesystem (`/home/<user>/...`) for the
-best build performance. VS Code users should install the **Remote - WSL**
-extension to edit files inside WSL from the Windows VS Code UI.
+**Option C (WSL):** `wsl --install` from PowerShell, then follow the Linux section.
+Clone inside the WSL filesystem for best performance.
 
 ## Linux
 
-Use your distribution's package manager.
+| Distribution | Install command |
+|---|---|
+| Debian / Ubuntu | `sudo apt install cmake ninja-build gcc` |
+| Fedora / RHEL | `sudo dnf install cmake ninja-build gcc` |
+| Arch Linux | `sudo pacman -S cmake ninja gcc` |
+| Other | Install `cmake`, `ninja`, and `gcc` or `clang` via your package manager |
 
-### Debian / Ubuntu
-
-```sh
-sudo apt update
-sudo apt install cmake ninja-build gcc
-```
-
-To use Clang instead of GCC:
-
-```sh
-sudo apt install cmake ninja-build clang
-```
-
-Optional editor tools:
-
-```sh
-sudo apt install clangd clang-format clang-tidy
-```
-
-On older Ubuntu releases where CMake 3.21+ is not in the default repositories,
-install CMake via pip (`pip install cmake`) or add the
-[Kitware APT repository](https://apt.kitware.com/).
-
-### Fedora / RHEL
-
-```sh
-sudo dnf install cmake ninja-build gcc
-```
-
-Or with Clang:
-
-```sh
-sudo dnf install cmake ninja-build clang
-```
-
-Optional editor tools:
-
-```sh
-sudo dnf install clang-tools-extra
-```
-
-### Arch Linux
-
-```sh
-sudo pacman -S cmake ninja gcc
-```
-
-Or with Clang:
-
-```sh
-sudo pacman -S cmake ninja clang
-```
-
-Optional editor tools:
-
-```sh
-sudo pacman -S clang
-```
-
-The `clang` package on Arch bundles clangd, clang-format, and clang-tidy.
-
-### Other distributions
-
-Use your package manager to install **cmake**, **ninja**, and **gcc** or
-**clang**. The bootstrap script reports which tools are missing.
+To use Clang, substitute `clang` for `gcc`. The bootstrap script reports missing tools.
 
 ## macOS
 
@@ -205,41 +79,15 @@ The bootstrap scripts accept AppleClang from Xcode or Homebrew's Clang.
 
 ## Verification
 
-From the repository root, run the bootstrap script:
-
-**Linux / macOS / MSYS2 UCRT64:**
+Run from the repository root:
 
 ```sh
-./scripts/bootstrap.sh
+./scripts/bootstrap.sh        # .\scripts\bootstrap.ps1 on Windows
 ```
 
-**Windows PowerShell (MSVC or winget path):**
-
-```powershell
-./scripts/bootstrap.ps1
-```
-
-The script checks for CMake, Ninja, a C compiler, and optional tools. On
-success it also runs `cmake --preset ninja-debug`, generating
-`build/ninja-debug/compile_commands.json` so editors can find project include
-paths.
-
-If something is missing, the script prints a specific error, for example:
-
-```
-ERROR: missing ninja. Install Ninja or choose a generator-neutral preset
-through CMakeUserPresets.json.
-```
-
-For a quick check that skips the configure step:
-
-```sh
-./scripts/bootstrap.sh --check-only
-```
-
-```powershell
-./scripts/bootstrap.ps1 -CheckOnly
-```
+The script checks for required tools and runs configure. On success it generates
+`compile_commands.json` for editor integration. Pass `--check-only` / `-CheckOnly`
+to skip the configure step.
 
 ## Optional Tools For Editor Integration
 
