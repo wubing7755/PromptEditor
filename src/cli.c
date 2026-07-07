@@ -904,7 +904,7 @@ static int prompt_body_path(char *out, size_t out_size, const char *root,
     return join_path(prompts_dir, sizeof(prompts_dir), root, "prompts") &&
            join_path(folder_dir, sizeof(folder_dir), prompts_dir, row->folder) &&
            join_path(prompt_dir, sizeof(prompt_dir), folder_dir, row->id) &&
-           join_path(out, out_size, prompt_dir, "current.txt");
+           join_path(out, out_size, prompt_dir, "current.md");
 }
 
 static int prompt_dir_path(char *out, size_t out_size, const char *root,
@@ -938,7 +938,7 @@ static int version_body_path(char *out, size_t out_size, const char *root,
     char versions_dir[PP_PATH_MAX];
     char filename[PP_FIELD_MAX];
 
-    return snprintf(filename, sizeof(filename), "%s.txt", version) > 0 &&
+    return snprintf(filename, sizeof(filename), "%s.md", version) > 0 &&
            strlen(filename) < sizeof(filename) &&
            versions_dir_path(versions_dir, sizeof(versions_dir), root, row) &&
            join_path(out, out_size, versions_dir, filename);
@@ -1450,7 +1450,7 @@ static int spawn_editor(const char *current_content, char *out, size_t out_size)
 
     {
 #ifdef HAS_MKTEMP_S
-        if (snprintf(temp_path, sizeof(temp_path), "%spromptlib_edit_XXXXXX.txt", tmp_dir) <= 0 ||
+        if (snprintf(temp_path, sizeof(temp_path), "%spromptlib_edit_XXXXXX.md", tmp_dir) <= 0 ||
             strlen(temp_path) >= sizeof(temp_path)) {
             fprintf(stderr, "Temporary path is too long.\n");
             return 0;
@@ -1461,7 +1461,7 @@ static int spawn_editor(const char *current_content, char *out, size_t out_size)
         }
 #else
         /* Fallback: use pid + time */
-        if (snprintf(temp_path, sizeof(temp_path), "%spromptlib_edit_%d_%d.txt", tmp_dir,
+        if (snprintf(temp_path, sizeof(temp_path), "%spromptlib_edit_%d_%d.md", tmp_dir,
                      (int)getpid(), (int)time(NULL)) <= 0 ||
             strlen(temp_path) >= sizeof(temp_path)) {
             fprintf(stderr, "Temporary path is too long.\n");
@@ -1579,7 +1579,7 @@ static int run_add(int argc, char **argv) {
     if (!join_path(prompts_dir, sizeof(prompts_dir), root, "prompts") ||
         !join_path(folder_dir, sizeof(folder_dir), prompts_dir, options.folder) ||
         !join_path(prompt_dir, sizeof(prompt_dir), folder_dir, id) ||
-        !join_path(body_file, sizeof(body_file), prompt_dir, "current.txt") ||
+        !join_path(body_file, sizeof(body_file), prompt_dir, "current.md") ||
         !join_path(metadata_file, sizeof(metadata_file), prompt_dir, "metadata.tsv") ||
         !join_path(meta_dir, sizeof(meta_dir), root, ".promptlib") ||
         !join_path(index_file, sizeof(index_file), meta_dir, "index.tsv")) {
@@ -3210,7 +3210,7 @@ static int run_browse(int argc, char **argv) {
                     free(items[i]);
                 return 1;
             }
-            strcat(temp_input, "promptlib_browse_XXXXXX.txt");
+            strcat(temp_input, "promptlib_browse_XXXXXX.md");
 #ifdef HAS_MKTEMP_S
             if (_mktemp_s(temp_input, strlen(temp_input) + 1) != 0) {
                 for (i = 0; i < item_count; ++i)
@@ -3222,11 +3222,11 @@ static int run_browse(int argc, char **argv) {
             {
                 char pid_buf[32];
                 snprintf(pid_buf, sizeof(pid_buf), "_%d_%d", (int)getpid(), (int)time(NULL));
-                size_t base_len = strlen(temp_input) - 4; /* before .txt */
+                size_t base_len = strlen(temp_input) - 3; /* before .md */
                 size_t pid_len = strlen(pid_buf);
-                if (base_len + pid_len + 5 < sizeof(temp_input)) {
+                if (base_len + pid_len + 4 < sizeof(temp_input)) {
                     memcpy(temp_input + base_len, pid_buf, pid_len + 1);
-                    strcat(temp_input, ".txt");
+                    strcat(temp_input, ".md");
                 }
             }
 #endif

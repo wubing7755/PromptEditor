@@ -101,7 +101,7 @@ stateDiagram-v2
     state Versioned {
         [*] --> Snapshot
         Snapshot --> Promoted: pp optimize --promote
-        Promoted --> Current: (copied to current.txt)
+        Promoted --> Current: (copied to current.md)
     }
 ```
 
@@ -422,7 +422,7 @@ Desc   Saves a new prompt, generating a stable ID and writing body, metadata, an
        index. Validates per [§3.21].
 Given  An initialized library and pp add --title "Hello World" --body "Say hello."
 When   The command executes
-Then   prompts/inbox/<slug>-<hash>/ is created containing current.txt ("Say hello.")
+Then   prompts/inbox/<slug>-<hash>/ is created containing current.md ("Say hello.")
        and metadata.tsv (id, title, folder=inbox, category=general, timestamps,
        current_version=1); index.tsv appended; stdout "Saved prompt: <id>"; exit code 0
 ```
@@ -1087,10 +1087,10 @@ pp optimize hello-world-a1b2 --compare 0002
 
 ```
 Title  Create optimized version
-Desc   Creates a new version snapshot under versions/ without modifying current.txt.
+Desc   Creates a new version snapshot under versions/ without modifying current.md.
 Given  A prompt with current version 1 (body "Original")
 When   pp optimize <id> --body "Improved" --note "Better wording"
-Then   versions/0002.txt="Improved"; versions/index.tsv appended; current.txt
+Then   versions/0002.md="Improved"; versions/index.tsv appended; current.md
        unchanged; stdout "Created optimized version: 0002"; exit code 0
 ```
 
@@ -1112,10 +1112,10 @@ Then   stderr: "Missing required option: --body."; exit code 1
 
 ```
 Title  Promote a version
-Desc   --promote creates the version and copies it to current.txt.
+Desc   --promote creates the version and copies it to current.md.
 Given  A prompt with current version 1
 When   pp optimize <id> --body "Promoted" --promote
-Then   current.txt="Promoted"; current_version=0002; stdout "Created and promoted
+Then   current.md="Promoted"; current_version=0002; stdout "Created and promoted
        optimized version: 0002"; exit code 0
 ```
 
@@ -1600,9 +1600,9 @@ Then   Valid JSON: {prompts, folders, categories, tags, versions, archived,
 ```
 Title  Atomic file writes
 Desc   All file writes replacing content use write-to-temp-then-rename.
-Given  A file write for current.txt
+Given  A file write for current.md
 When   The write executes
-Then   Content written to current.txt.tmp first; on success, original replaced via rename()
+Then   Content written to current.md.tmp first; on success, original replaced via rename()
 ```
 
 ---
@@ -1968,8 +1968,8 @@ graph TD
         M[".promptlib/"] --> V["version"] & I["index.tsv"] & F["folders.tsv"] & C["categories.tsv"]
         P["prompts/"] --> FD["&lt;folder&gt;/"]
         FD --> PR["&lt;prompt-id&gt;/"]
-        PR --> CT["current.txt"] & MT["metadata.tsv"] & VD["versions/"]
-        VD --> VI["index.tsv"] & VB["NNNN.txt"] & VM["NNNN.tsv"]
+        PR --> CT["current.md"] & MT["metadata.tsv"] & VD["versions/"]
+        VD --> VI["index.tsv"] & VB["NNNN.md"] & VM["NNNN.tsv"]
         A["archive/"] --> AP["&lt;prompt-id&gt;/"]
     end
 ```

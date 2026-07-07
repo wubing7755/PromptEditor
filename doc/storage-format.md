@@ -14,15 +14,15 @@ This document specifies the PromptEditor library file layout and data formats.
   prompts/
     <folder>/
       <prompt-id>/
-        current.txt   → active prompt body
+        current.md    → active prompt body (Markdown)
         metadata.tsv  → per-prompt metadata (source of truth)
         versions/
           index.tsv   → version manifest
-          NNNN.txt    → snapshot body (0002–9999)
+          NNNN.md     → snapshot body (0002–9999)
           NNNN.tsv    → snapshot metadata
   archive/
     <prompt-id>/      → archived prompt (identical layout to active prompt)
-      current.txt
+      current.md
       metadata.tsv
       versions/
 ```
@@ -45,7 +45,7 @@ IDs are ≤ 128 characters and unique per distinct title.
 
 ## Prompt Body
 
-Prompt text is stored as plain UTF-8 text in `current.txt`. The application
+Prompt text is stored as Markdown in `current.md`. The application
 does not require a special template language.
 
 ## Metadata
@@ -82,19 +82,19 @@ Metadata is stored as tab-separated `key<TAB>value` rows in `metadata.tsv`.
 
 ## Versioning
 
-Version `1` is implicit (the initial body at `current.txt`). Optimized
+Version `1` is implicit (the initial body at `current.md`). Optimized
 prompts create new numbered snapshots under `versions/`.
 
 ```text
 versions/
   index.tsv     → columns: version, promoted, created_at, note
-  0002.txt      → body snapshot
+  0002.md       → body snapshot
   0002.tsv      → snapshot metadata
 ```
 
 - Version numbers are 4-digit zero-padded decimals (`0002`–`9999`).
 - Auto-increment from the highest existing version.
-- Promoting a version copies its body into `current.txt` and updates
+- Promoting a version copies its body into `current.md` and updates
   `current_version` in `metadata.tsv`.
 
 ## Index (Cache)
@@ -142,7 +142,7 @@ writing
 
 When a prompt is deleted, its entire directory is moved from
 `prompts/<folder>/<prompt-id>/` to `archive/<prompt-id>/`, preserving
-`current.txt`, `metadata.tsv`, and `versions/` intact. The index row is
+`current.md`, `metadata.tsv`, and `versions/` intact. The index row is
 removed.
 
 - `pp archive list` — list archived prompts.
