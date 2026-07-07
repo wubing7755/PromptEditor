@@ -104,12 +104,6 @@ Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environmen
     Check: IsAdminInstallMode() and WizardIsTaskSelected('addtopath'); \
     Tasks: addtopath
 
-; Uninstall registry entry
-Root: HKCU; Subkey: "Environment"; ValueType: expandsz; ValueName: "Path"; \
-    ValueData: "{olddata};"; \
-    Check: not IsAdminInstallMode() and WizardIsTaskSelected('addtopath'); \
-    Flags: uninsremovesection
-
 [Code]
 // --- Custom path removal helper ---
 function RemoveFromPath(const Path, Entry: string): string;
