@@ -14,7 +14,7 @@ try {
 # Default prefix
 if (-not $Prefix) {
     if ($IsWindows -or $env:OS -eq "Windows_NT") {
-        $Prefix = Join-Path $env:LOCALAPPDATA "Programs\pp"
+        $Prefix = Join-Path $env:LOCALAPPDATA "Programs\PromptEditor"
     } elseif ($IsMacOS -or $IsLinux) {
         $homeLocal = Join-Path $env:HOME ".local\bin"
         if (Test-Path $homeLocal) {
