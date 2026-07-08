@@ -72,7 +72,10 @@ static char *win32_utf8(const char *ansi) {
 #define PP_UTF8(s) win32_utf8(s)
 #define PP_UTF8_FREE(s) free((void *)(s))
 #else
-#define PP_UTF8(s) ((char *)(uintptr_t)(s))
+static inline char *pp_utf8_noop(const char *s) {
+    return (char *)s;
+}
+#define PP_UTF8(s) pp_utf8_noop(s)
 #define PP_UTF8_FREE(s) ((void)0)
 #endif
 
