@@ -660,7 +660,7 @@ static int default_root(char *out, size_t out_size) {
     /*
      * 4. Fall back to the user's home directory.  init_library() (and
      *    every other path) creates .promptlib/ *inside* the resolved
-     *    root, so the root must be the parent directory â€?not the
+     *    root, so the root must be the parent directory éˆ¥?not the
      *    .promptlib directory itself.
      */
 #ifdef _WIN32
