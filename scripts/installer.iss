@@ -77,8 +77,7 @@ Name: "associate"; Description: "&Associate .md files with pp edit (open .md fil
 ; Main executable
 Source: "{#SourceDir}\{#AppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 
-; Documentation
-Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion isreadme
+; License
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
