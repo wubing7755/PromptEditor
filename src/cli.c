@@ -560,8 +560,7 @@ static int default_root(char *out, size_t out_size) {
             read_text_file(config_file, saved_root, sizeof(saved_root))) {
             saved_root[strcspn(saved_root, "\r\n")] = '\0';
             if (saved_root[0] != '\0' && path_exists_as_dir(saved_root)) {
-                return snprintf(out, out_size, "%s", saved_root) > 0 &&
-                       strlen(out) < out_size;
+                return snprintf(out, out_size, "%s", saved_root) > 0 && strlen(out) < out_size;
             }
         }
     }
