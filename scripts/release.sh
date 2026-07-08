@@ -53,8 +53,9 @@ done
 
 # Determine version from CMake project() if not provided
 if [ -z "$VERSION" ]; then
-  VERSION=$(sed -n 's/.*project(PromptEditor\s\+VERSION\s\+\([0-9.]\+\).*/\1/p' \
-    "$REPO_ROOT/CMakeLists.txt" | head -1)
+  VERSION=$(awk '/project\(PromptEditor/,/\)/ {
+      if ($1 == "VERSION") { print $2; exit }
+  }' "$REPO_ROOT/CMakeLists.txt")
   if [ -z "$VERSION" ]; then
     VERSION="0.0.0"
   fi
