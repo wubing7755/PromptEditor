@@ -474,6 +474,26 @@ static int copy_file_if_exists(const char *source, const char *destination) {
     return copy_text_file(source, destination);
 }
 
+static int config_file_path(char *out, size_t out_size) {
+    const char *home;
+    char config_dir[PP_PATH_MAX];
+#ifdef _WIN32
+    home = getenv("USERPROFILE");
+#else
+    home = getenv("HOME");
+#endif
+    if (home == NULL || home[0] == '\0') {
+        return 0;
+    }
+    if (!join_path(config_dir, sizeof(config_dir), home, ".prompteditor")) {
+        return 0;
+    }
+    if (!make_dir_if_missing(config_dir)) {
+        return 0;
+    }
+    return join_path(out, out_size, config_dir, "config");
+}
+
 static int default_root(char *out, size_t out_size) {
     const char *root_env;
     const char *home;
@@ -529,7 +549,24 @@ static int default_root(char *out, size_t out_size) {
     }
 
     /*
-     * 2. Honour PROMPTLIB_ROOT environment variable.
+     * 2. Check the saved default root (~/.prompteditor/config).
+     *    pp init writes this automatically so commands run from
+     *    unrelated directories still find the library.
+     */
+    {
+        char config_file[PP_PATH_MAX];
+        char saved_root[PP_PATH_MAX];
+        if (config_file_path(config_file, sizeof(config_file)) &&
+            read_text_file(config_file, saved_root, sizeof(saved_root))) {
+            saved_root[strcspn(saved_root, "\r\n")] = '\0';
+            if (saved_root[0] != '\0' && path_exists_as_dir(saved_root)) {
+                return snprintf(out, out_size, "%s", saved_root) > 0 && strlen(out) < out_size;
+            }
+        }
+    }
+
+    /*
+     * 3. Honour PROMPTLIB_ROOT environment variable.
      */
     root_env = getenv("PROMPTLIB_ROOT");
     if (root_env != NULL && root_env[0] != '\0') {
@@ -537,7 +574,7 @@ static int default_root(char *out, size_t out_size) {
     }
 
     /*
-     * 3. Fall back to the user's home directory.  init_library() (and
+     * 4. Fall back to the user's home directory.  init_library() (and
      *    every other path) creates .promptlib/ *inside* the resolved
      *    root, so the root must be the parent directory — not the
      *    .promptlib directory itself.
@@ -550,7 +587,7 @@ static int default_root(char *out, size_t out_size) {
 
     if (home == NULL || home[0] == '\0') {
         fprintf(stderr, "No library root provided and user home could not be detected.\n");
-        fprintf(stderr, "Pass --root <path> or set PROMPTLIB_ROOT.\n");
+        fprintf(stderr, "Run 'pp init --root <path>' or set PROMPTLIB_ROOT.\n");
         return 0;
     }
 
@@ -598,6 +635,14 @@ static int init_library(const char *root) {
         !write_text_file_if_missing(folders_file, "name\ninbox\n") ||
         !write_text_file_if_missing(categories_file, "name\ngeneral\n")) {
         return 0;
+    }
+
+    /* Remember this root as the default for commands run from other directories. */
+    {
+        char config_file[PP_PATH_MAX];
+        if (config_file_path(config_file, sizeof(config_file))) {
+            write_text_file(config_file, root);
+        }
     }
 
     printf("Prompt library ready: %s\n", root);
