@@ -118,6 +118,10 @@ struct prompt_index_row {
 
 static int index_file_path(char *out, size_t out_size, const char *root);
 
+// ============================================================================
+// Help text for each command
+// ============================================================================
+// Prints the top-level command summary.
 static void print_help(void) {
     puts("Usage: pp <command> [options]");
     puts("");
@@ -144,6 +148,7 @@ static void print_help(void) {
     puts("Run 'pp <command> --help' for command-specific usage.");
 }
 
+// Prints usage for pp init.
 static void print_init_help(void) {
     puts("Usage: pp init [--root <path>]");
     puts("");
@@ -154,6 +159,7 @@ static void print_init_help(void) {
     puts("  -h, --help       Show this help");
 }
 
+// Prints usage for pp add.
 static void print_add_help(void) {
     puts("Usage: pp add --title <text> --body <text> [options]");
     puts("");
@@ -284,14 +290,20 @@ static void print_version(void) {
     puts("pp " PP_CLI_VERSION);
 }
 
+// ============================================================================
+// File-system and path helpers
+// ============================================================================
+// Returns 1 if arg is -h or --help.
 static int is_help_flag(const char *arg) {
     return strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0;
 }
 
+// Returns 1 if arg is -v or --version.
 static int is_version_flag(const char *arg) {
     return strcmp(arg, "-v") == 0 || strcmp(arg, "--version") == 0;
 }
 
+// Returns 1 if path exists and is a directory.
 static int path_exists_as_dir(const char *path) {
     struct stat info;
 
@@ -302,6 +314,7 @@ static int path_exists_as_dir(const char *path) {
     return (info.st_mode & S_IFDIR) != 0;
 }
 
+// Returns 1 if path exists and is a regular file.
 static int path_exists_as_file(const char *path) {
     struct stat info;
 
@@ -312,6 +325,8 @@ static int path_exists_as_file(const char *path) {
     return (info.st_mode & S_IFREG) != 0;
 }
 
+// Joins left and right with the platform path separator.
+// Writes the result to out and returns 1 on success.
 static int join_path(char *out, size_t out_size, const char *left, const char *right) {
     size_t left_len;
     const char *separator;
@@ -331,6 +346,8 @@ static int join_path(char *out, size_t out_size, const char *left, const char *r
     return snprintf(out, out_size, "%s%s%s", left, separator, right) > 0 && strlen(out) < out_size;
 }
 
+// Creates a single directory if it does not already exist.
+// Returns 1 on success (including when the directory already exists).
 static int make_dir_if_missing(const char *path) {
     if (path_exists_as_dir(path)) {
         return 1;
@@ -348,6 +365,7 @@ static int make_dir_if_missing(const char *path) {
     return 0;
 }
 
+// Creates a directory and all missing parent directories.
 static int make_dir_recursive(const char *path) {
     char partial[PP_PATH_MAX];
     size_t index;
@@ -380,6 +398,8 @@ static int make_dir_recursive(const char *path) {
     return make_dir_if_missing(partial);
 }
 
+// Writes content to path only if the file does not already exist.
+// Returns 1 on success.
 static int write_text_file_if_missing(const char *path, const char *content) {
     FILE *file;
 
@@ -407,6 +427,7 @@ static int write_text_file_if_missing(const char *path, const char *content) {
     return 1;
 }
 
+// Atomically writes content to path via a temp-file + rename strategy.
 static int write_text_file(const char *path, const char *content) {
     char temp_path[PP_PATH_MAX];
     FILE *file;
@@ -452,6 +473,8 @@ static int write_text_file(const char *path, const char *content) {
     return 1;
 }
 
+// Replaces final_path with the contents of temp_path via rename.
+// Cleans up temp_path on failure.
 static int replace_file_with_temp(const char *temp_path, const char *final_path) {
     if (remove(final_path) != 0 && errno != ENOENT) {
         fprintf(stderr, "Could not replace '%s': %s\n", final_path, strerror(errno));
@@ -468,6 +491,7 @@ static int replace_file_with_temp(const char *temp_path, const char *final_path)
     return 1;
 }
 
+// Appends content to path. Returns 1 on success.
 static int append_text_file(const char *path, const char *content) {
     FILE *file = fopen(path, "ab");
 
@@ -485,6 +509,8 @@ static int append_text_file(const char *path, const char *content) {
     return fclose(file) == 0;
 }
 
+// Reads the entire contents of a text file into out (up to out_size-1 bytes).
+// Always null-terminates. Returns 1 on success.
 static int read_text_file(const char *path, char *out, size_t out_size) {
     FILE *file;
     size_t read_count;
@@ -511,6 +537,7 @@ static int read_text_file(const char *path, char *out, size_t out_size) {
     return fclose(file) == 0;
 }
 
+// Copies source file to destination. Returns 1 on success.
 static int copy_text_file(const char *source, const char *destination) {
     char content[PP_BODY_MAX];
 
@@ -518,6 +545,7 @@ static int copy_text_file(const char *source, const char *destination) {
            write_text_file(destination, content);
 }
 
+// Copies source to destination only if source exists. No-op otherwise.
 static int copy_file_if_exists(const char *source, const char *destination) {
     if (!path_exists_as_file(source)) {
         return 1;
@@ -526,6 +554,8 @@ static int copy_file_if_exists(const char *source, const char *destination) {
     return copy_text_file(source, destination);
 }
 
+// Writes the path to ~/.promptconfig into out.
+// Returns 1 on success.
 static int config_file_path(char *out, size_t out_size) {
     const char *home;
 #ifdef _WIN32
@@ -539,6 +569,15 @@ static int config_file_path(char *out, size_t out_size) {
     return join_path(out, out_size, home, ".promptconfig");
 }
 
+// ============================================================================
+// Library root discovery ? environment, config file, walk-up, fallback
+// ============================================================================
+// Resolves the active library root using the precedence chain:
+//   1. walk-up discovery (find .promptlib/ from cwd)
+//   2. ~/.promptconfig saved default
+//   3. PROMPTLIB_ROOT environment variable
+//   4. user home directory
+// Writes the result to out and returns 1 on success.
 static int default_root(char *out, size_t out_size) {
     const char *root_env;
     const char *home;
@@ -621,7 +660,7 @@ static int default_root(char *out, size_t out_size) {
     /*
      * 4. Fall back to the user's home directory.  init_library() (and
      *    every other path) creates .promptlib/ *inside* the resolved
-     *    root, so the root must be the parent directory — not the
+     *    root, so the root must be the parent directory 鈥?not the
      *    .promptlib directory itself.
      */
 #ifdef _WIN32
@@ -639,6 +678,9 @@ static int default_root(char *out, size_t out_size) {
     return snprintf(out, out_size, "%s", home) > 0 && strlen(out) < out_size;
 }
 
+// Scans argv for --root <path> starting at start_index.
+// Falls back to default_root() if --root is absent.
+// Writes the resolved path to out and returns 1 on success.
 static int resolve_root_arg(int start_index, int argc, char **argv, char *out, size_t out_size) {
     int index;
 
@@ -656,6 +698,12 @@ static int resolve_root_arg(int start_index, int argc, char **argv, char *out, s
     return default_root(out, out_size);
 }
 
+// Creates the directory skeleton for a prompt library under root:
+//   root/.promptlib/   (metadata)
+//   root/prompts/      (prompt data)
+//   root/archive/      (archived prompts)
+// Writes version, empty index, and registry files.
+// Returns 0 on any I/O failure.
 static int init_library(const char *root) {
     char meta_dir[PP_PATH_MAX];
     char prompts_dir[PP_PATH_MAX];
@@ -694,6 +742,11 @@ static int init_library(const char *root) {
     return 1;
 }
 
+// ============================================================================
+// Timestamps, ID generation, input validation, and tag helpers
+// ============================================================================
+// Checks that root exists, is a directory, and contains index.tsv.
+// Prints an error message and returns 0 if validation fails.
 static int validate_library_root(const char *root) {
     char meta_dir[PP_PATH_MAX];
     char prompts_dir[PP_PATH_MAX];
@@ -716,6 +769,7 @@ static int validate_library_root(const char *root) {
     return 1;
 }
 
+// Writes an ISO-8601 UTC timestamp (YYYY-MM-DDTHH:MM:SSZ) into out.
 static void current_timestamp(char *out, size_t out_size) {
     time_t now = time(NULL);
     struct tm *local = localtime(&now);
@@ -736,6 +790,7 @@ static unsigned long hash_text(const char *text) {
     return hash;
 }
 
+// Converts title to a lowercased, dash-separated slug for use in prompt IDs.
 static void slugify_title(const char *title, char *out, size_t out_size) {
     size_t written = 0;
     int last_dash = 0;
@@ -765,6 +820,7 @@ static void slugify_title(const char *title, char *out, size_t out_size) {
     out[written] = '\0';
 }
 
+// Generates a unique prompt ID: slugified-title + 4-char djb2 hash suffix.
 static void prompt_id_from_title(const char *title, char *out, size_t out_size) {
     char slug[PP_FIELD_MAX];
 
@@ -772,20 +828,24 @@ static void prompt_id_from_title(const char *title, char *out, size_t out_size) 
     snprintf(out, out_size, "%s-%04lx", slug, hash_text(title) & 0xffffUL);
 }
 
+// Returns 1 if value contains .. or : segments (path traversal / absolute path).
 static int path_has_unsafe_segment(const char *value) {
     return strstr(value, "..") != NULL || strchr(value, ':') != NULL || value[0] == '/' ||
            value[0] == '\\';
 }
 
+// Returns 1 if value contains tab or newline characters.
 static int field_has_unsupported_chars(const char *value) {
     return value != NULL && (strchr(value, '\t') != NULL || strchr(value, '\n') != NULL ||
                              strchr(value, '\r') != NULL);
 }
 
+// Returns 1 if the field exceeds PP_FIELD_MAX.
 static int field_is_too_long(const char *value) {
     return value != NULL && strlen(value) >= PP_FIELD_MAX;
 }
 
+// Returns 1 if value matches the 4-digit version format (e.g. 0002).
 static int valid_version_name(const char *value) {
     size_t index;
 
@@ -802,6 +862,8 @@ static int valid_version_name(const char *value) {
     return 1;
 }
 
+// Appends a tag to options->tags (comma-delimited). No-op if already present.
+// Returns 0 if the tag contains commas or the buffer is full.
 static int add_tag_value(struct prompt_options *options, const char *tag) {
     size_t current_len;
     size_t tag_len;
@@ -827,6 +889,7 @@ static int add_tag_value(struct prompt_options *options, const char *tag) {
     return 1;
 }
 
+// Returns 1 if the comma-delimited tag list contains the given tag.
 static int tag_list_contains(const char *tags, const char *tag) {
     char copy[PP_FIELD_MAX];
     char *current;
@@ -847,6 +910,7 @@ static int tag_list_contains(const char *tags, const char *tag) {
     return 0;
 }
 
+// Case-insensitive substring search. Returns 1 if needle is found.
 static int contains_text(const char *haystack, const char *needle) {
     size_t haystack_len;
     size_t needle_len;
@@ -884,6 +948,8 @@ static int contains_text(const char *haystack, const char *needle) {
     return 0;
 }
 
+// Returns 1 if the index row matches the optional folder/category/tag filters.
+// A NULL filter means "match all".
 static int row_matches_filters(const struct prompt_index_row *row,
                                const struct prompt_options *filters) {
     if (filters->filter_folder != NULL && strcmp(row->folder, filters->filter_folder) != 0) {
@@ -901,6 +967,7 @@ static int row_matches_filters(const struct prompt_index_row *row,
     return 1;
 }
 
+// Returns 1 if the row's title, body, tags, category, or description match query.
 static int row_matches_query(const struct prompt_index_row *row, const char *body,
                              const char *query) {
     return contains_text(row->id, query) || contains_text(row->title, query) ||
@@ -908,6 +975,8 @@ static int row_matches_query(const struct prompt_index_row *row, const char *bod
            contains_text(row->tags, query) || contains_text(body, query);
 }
 
+// Parses a TSV line from index.tsv into a prompt_index_row.
+// Strips trailing newlines. Returns 1 on success.
 static int parse_index_row(char *line, struct prompt_index_row *row) {
     char *field;
 
@@ -953,6 +1022,8 @@ static int parse_index_row(char *line, struct prompt_index_row *row) {
     return strcmp(row->id, "id") != 0;
 }
 
+// Searches index.tsv for a prompt matching id_or_title (by ID first, then by
+// case-insensitive title). Writes the matched row to found and returns 1.
 static int find_prompt(const char *root, const char *id_or_title, struct prompt_index_row *found) {
     char meta_dir[PP_PATH_MAX];
     char index_file[PP_PATH_MAX];
@@ -985,6 +1056,8 @@ static int find_prompt(const char *root, const char *id_or_title, struct prompt_
     return 0;
 }
 
+// Builds the path to a prompt's body file:
+//   root/prompts/{folder}/{id}/body.md
 static int prompt_body_path(char *out, size_t out_size, const char *root,
                             const struct prompt_index_row *row) {
     char prompts_dir[PP_PATH_MAX];
@@ -997,6 +1070,7 @@ static int prompt_body_path(char *out, size_t out_size, const char *root,
            join_path(out, out_size, prompt_dir, "current.md");
 }
 
+// Builds the directory path for a prompt: root/prompts/{folder}/{id}
 static int prompt_dir_path(char *out, size_t out_size, const char *root,
                            const struct prompt_index_row *row) {
     char prompts_dir[PP_PATH_MAX];
@@ -1007,6 +1081,7 @@ static int prompt_dir_path(char *out, size_t out_size, const char *root,
            join_path(out, out_size, folder_dir, row->id);
 }
 
+// Builds the path to a prompt's metadata.tsv file.
 static int prompt_metadata_path(char *out, size_t out_size, const char *root,
                                 const struct prompt_index_row *row) {
     char prompt_dir[PP_PATH_MAX];
@@ -1149,6 +1224,9 @@ static int copy_prompt_payload(const char *source_root, const char *destination_
            copy_prompt_versions(source_root, destination_root, row);
 }
 
+// ============================================================================
+// Index file and registry (folder/category) I/O
+// ============================================================================
 static int index_file_path(char *out, size_t out_size, const char *root) {
     char meta_dir[PP_PATH_MAX];
 
@@ -1156,6 +1234,7 @@ static int index_file_path(char *out, size_t out_size, const char *root) {
            join_path(out, out_size, meta_dir, "index.tsv");
 }
 
+// Builds the path to a registry file: root/.promptlib/{kind}s.tsv
 static int registry_file_path(char *out, size_t out_size, const char *root, const char *kind) {
     char meta_dir[PP_PATH_MAX];
     const char *filename = strcmp(kind, "folder") == 0 ? "folders.tsv" : "categories.tsv";
@@ -1164,6 +1243,7 @@ static int registry_file_path(char *out, size_t out_size, const char *root, cons
            join_path(out, out_size, meta_dir, filename);
 }
 
+// Returns 1 if name is already registered in the {kind} registry.
 static int registry_contains(const char *root, const char *kind, const char *name) {
     char registry_file[PP_PATH_MAX];
     char line[PP_FIELD_MAX];
@@ -1190,6 +1270,7 @@ static int registry_contains(const char *root, const char *kind, const char *nam
     return 0;
 }
 
+// Appends name to the {kind} registry file if not already present.
 static int registry_add(const char *root, const char *kind, const char *name) {
     char registry_file[PP_PATH_MAX];
     char line[PP_FIELD_MAX];
@@ -1264,6 +1345,7 @@ static int registry_rewrite(const char *root, const char *kind, const char *from
     return 1;
 }
 
+// Prints all registered names of the given kind to stdout.
 static int registry_list(const char *root, const char *kind) {
     char registry_file[PP_PATH_MAX];
     char line[PP_FIELD_MAX];
@@ -1286,6 +1368,8 @@ static int registry_list(const char *root, const char *kind) {
     return fclose(file) == 0;
 }
 
+// Reads the value for a given key from a TSV metadata file.
+// Returns 1 if the key was found and the value fits.
 static int read_metadata_value(const char *metadata_file, const char *key, char *out,
                                size_t out_size) {
     FILE *file;
@@ -1311,6 +1395,8 @@ static int read_metadata_value(const char *metadata_file, const char *key, char 
     return 0;
 }
 
+// Writes a prompt's metadata.tsv from the index row and optional fields.
+// Keeps existing fields that are not being updated.
 static int write_prompt_metadata(const char *root, const struct prompt_index_row *row,
                                  const char *description, const char *current_version) {
     char metadata_file[PP_PATH_MAX];
@@ -1335,10 +1421,12 @@ static int write_prompt_metadata(const char *root, const struct prompt_index_row
     return write_text_file(metadata_file, metadata);
 }
 
+// Formats a version integer as a zero-padded 4-digit string (e.g. 0002).
 static void format_version_number(int version, char *out, size_t out_size) {
     snprintf(out, out_size, "%04d", version);
 }
 
+// Returns the next available version number for a prompt (current max + 1).
 static int next_version_number(const char *root, const struct prompt_index_row *row) {
     char index_file[PP_PATH_MAX];
     FILE *file;
@@ -1366,6 +1454,7 @@ static int next_version_number(const char *root, const struct prompt_index_row *
     return max_version + 1;
 }
 
+// Updates (or removes if remove_row is set) an index.tsv entry matching target->id.
 static int rewrite_index_row(const char *root, const struct prompt_index_row *target,
                              int remove_target) {
     char index_file[PP_PATH_MAX];
@@ -1421,6 +1510,12 @@ static int rewrite_index_row(const char *root, const struct prompt_index_row *ta
     return 1;
 }
 
+// ============================================================================
+// Command: pp init ? initialize a prompt library root
+// ============================================================================
+// Handles pp init.  Resolves the library root, creates the directory
+// skeleton (.promptlib/, prompts/, archive/), writes version + empty
+// index + registry files, and saves the root to ~/.promptconfig.
 static int run_init(int argc, char **argv) {
     char root[PP_PATH_MAX];
     int index;
@@ -1439,6 +1534,11 @@ static int run_init(int argc, char **argv) {
     return init_library(root) ? 0 : 1;
 }
 
+// ============================================================================
+// Command: pp add ? save a new prompt
+// ============================================================================
+// Parses command-line options for pp add into a prompt_options struct.
+// Validates mandatory fields (title, body or --editor) and field constraints.
 static int parse_add_options(int argc, char **argv, struct prompt_options *options) {
     int index;
 
@@ -1517,6 +1617,8 @@ static int parse_add_options(int argc, char **argv, struct prompt_options *optio
  * Returns 1 on success, 0 if the editor returned non-zero or the
  * temporary file could not be read.
  */
+// Opens  with current_content in a temp file and reads back the result.
+// Falls back to notepad (Windows) or vi (Unix) if EDITOR is unset.
 static int spawn_editor(const char *current_content, char *out, size_t out_size) {
     const char *editor;
     char temp_path[PP_PATH_MAX];
@@ -1634,6 +1736,9 @@ static int spawn_editor(const char *current_content, char *out, size_t out_size)
     return 1;
 }
 
+// Handles pp add.  Parses options, generates a prompt ID, creates the
+// folder structure under root/prompts/, writes body.md and metadata.tsv,
+// and appends a row to index.tsv.
 static int run_add(int argc, char **argv) {
     struct prompt_options options;
     char root[PP_PATH_MAX];
@@ -1796,6 +1901,11 @@ static int run_add(int argc, char **argv) {
  * escape_json - Escapes a string for JSON output.
  * Writes to `out` up to `out_size` bytes. Returns the number of bytes written.
  */
+// ============================================================================
+// Output helpers ? JSON formatting, ANSI color, pager support
+// ============================================================================
+// Escapes special characters in input for JSON string output.
+// Handles backslash, double-quote, and common control characters.
 static int escape_json(const char *input, char *out, size_t out_size) {
     size_t in_idx, out_idx;
 
@@ -1894,6 +2004,7 @@ static void print_json_body(const char *body) {
  * use_color - Checks whether ANSI color output should be used.
  * Returns 1 if stdout is a terminal and NO_COLOR is not set.
  */
+// Returns 1 if the output is a TTY, NO_COLOR is unset, and TERM is not "dumb".
 static int use_color(void) {
     const char *no_color;
 
@@ -1948,6 +2059,12 @@ static void pager_close(FILE *p) {
     }
 }
 
+// ============================================================================
+// Command: pp list ? list prompts as a colored table
+// ============================================================================
+// Handles pp list.  Reads index.tsv, applies optional folder/category/tag
+// filters, and prints a colored table (or JSON if --json).  Pipes long output
+// through  unless --no-pager is given.
 static int run_list(int argc, char **argv) {
     char root[PP_PATH_MAX];
     char meta_dir[PP_PATH_MAX];
@@ -2077,6 +2194,11 @@ static int run_list(int argc, char **argv) {
     return 0;
 }
 
+// ============================================================================
+// Command: pp show ? display a prompt by id or title
+// ============================================================================
+// Handles pp show <id-or-title>.  Finds the prompt, prints metadata and
+// body (raw with --raw, JSON with --json).
 static int run_show(int argc, char **argv) {
     char root[PP_PATH_MAX];
     char body_file[PP_PATH_MAX];
@@ -2174,6 +2296,12 @@ static int run_show(int argc, char **argv) {
     return 0;
 }
 
+// ============================================================================
+// Command: pp search ? full-text search across prompts
+// ============================================================================
+// Handles pp search <query>.  Performs case-insensitive search across
+// titles, bodies, tags, categories, and descriptions.  Supports --raw and
+// --json output, plus folder/category/tag pre-filters.
 static int run_search(int argc, char **argv) {
     char root[PP_PATH_MAX];
     char index_file[PP_PATH_MAX];
@@ -2292,6 +2420,13 @@ static int run_search(int argc, char **argv) {
     return 0;
 }
 
+// ============================================================================
+// Command: pp edit ? update prompt metadata or body
+// ============================================================================
+// Handles pp edit <id-or-title>.  Updates one or more fields of a prompt
+// (title, body, category, tags, description, folder).  Without explicit
+// options, opens  for body editing.  Handles folder moves by
+// moving the prompt directory and rewriting index + registry entries.
 static int run_edit(int argc, char **argv) {
     char root[PP_PATH_MAX];
     char body_file[PP_PATH_MAX];
@@ -2525,6 +2660,9 @@ static int run_edit(int argc, char **argv) {
     return 0;
 }
 
+// ============================================================================
+// Command: pp optimize ? versioned prompt improvements
+// ============================================================================
 static int append_version_index(const char *root, const struct prompt_index_row *row,
                                 const char *version, const char *timestamp, const char *promoted,
                                 const char *note) {
@@ -2542,6 +2680,7 @@ static int append_version_index(const char *root, const struct prompt_index_row 
     return append_text_file(index_file, line);
 }
 
+// Lists all saved versions for a prompt from the versions/ directory.
 static int show_version_history(const char *root, const struct prompt_index_row *row) {
     char index_file[PP_PATH_MAX];
     char line[PP_BODY_MAX];
@@ -2566,6 +2705,7 @@ static int show_version_history(const char *root, const struct prompt_index_row 
     return fclose(file) == 0;
 }
 
+// Prints a side-by-side diff between the current body and a saved version.
 static int compare_version(const char *root, const struct prompt_index_row *row,
                            const char *version) {
     char current_file[PP_PATH_MAX];
@@ -2602,6 +2742,9 @@ static int compare_version(const char *root, const struct prompt_index_row *row,
     return 1;
 }
 
+// Handles pp optimize <id-or-title>.  Creates a versioned snapshot of
+// the current body, saves an improved version, and optionally promotes it
+// or shows version history / diffs.
 static int run_optimize(int argc, char **argv) {
     char root[PP_PATH_MAX];
     char versions_dir[PP_PATH_MAX];
@@ -2744,6 +2887,12 @@ static int run_optimize(int argc, char **argv) {
     return 0;
 }
 
+// ============================================================================
+// Command: pp delete ? archive a prompt
+// ============================================================================
+// Handles pp delete <id-or-title>.  Moves the prompt from root/prompts/
+// to root/archive/, removes its index entry, and adds an archive row with
+// timestamp.  Requires --yes to confirm.
 static int run_delete(int argc, char **argv) {
     char root[PP_PATH_MAX];
     char prompt_dir[PP_PATH_MAX];
@@ -2821,6 +2970,10 @@ static int run_delete(int argc, char **argv) {
     return 0;
 }
 
+// ============================================================================
+// Command: pp folder / pp category ? registry management
+// ============================================================================
+// Returns 1 if any prompt in index.tsv references the given folder/category name.
 static int registry_name_in_use(const char *root, const char *kind, const char *name) {
     char index_file[PP_PATH_MAX];
     char line[PP_BODY_MAX];
@@ -2850,6 +3003,8 @@ static int registry_name_in_use(const char *root, const char *kind, const char *
     return 0;
 }
 
+// Renames a folder/category in every referencing index row and moves/rewrites
+// the corresponding prompt directories.
 static int update_registry_references(const char *root, const char *kind, const char *from,
                                       const char *to) {
     char index_file[PP_PATH_MAX];
@@ -2929,6 +3084,9 @@ static int update_registry_references(const char *root, const char *kind, const 
     return 1;
 }
 
+// Handles pp folder and pp category subcommands:
+//   list, create, remove (with --yes), rename (with --to).
+// Blocks removal when the name is still referenced by prompts.
 static int run_registry_command(int argc, char **argv, const char *kind) {
     char root[PP_PATH_MAX];
     const char *action = NULL;
@@ -3062,6 +3220,11 @@ static int run_registry_command(int argc, char **argv, const char *kind) {
     return 1;
 }
 
+// ============================================================================
+// Command: pp export / pp backup ? copy prompts to another location
+// ============================================================================
+// Copies prompts from source_root to destination_root, optionally filtered
+// by folder.  Initializes the destination as a new library.
 static int export_library(const char *source_root, const char *destination_root,
                           const char *folder_filter) {
     char index_file[PP_PATH_MAX];
@@ -3112,6 +3275,8 @@ static int export_library(const char *source_root, const char *destination_root,
     return 1;
 }
 
+// Handles pp export.  Exports prompts (optionally filtered by --folder)
+// to a destination directory specified with --out.
 static int run_export(int argc, char **argv) {
     char root[PP_PATH_MAX];
     const char *root_arg = NULL;
@@ -3166,6 +3331,7 @@ static int run_export(int argc, char **argv) {
     return export_library(root, out, folder) ? 0 : 1;
 }
 
+// Handles pp backup.  Creates a full library backup (unfiltered export).
 static int run_backup(int argc, char **argv) {
     char root[PP_PATH_MAX];
     const char *root_arg = NULL;
@@ -3211,6 +3377,9 @@ static int run_backup(int argc, char **argv) {
     return export_library(root, out, NULL) ? 0 : 1;
 }
 
+// ============================================================================
+// Command: pp import ? merge prompts from another library
+// ============================================================================
 static int run_import(int argc, char **argv) {
     char root[PP_PATH_MAX];
     char source_index[PP_PATH_MAX];
@@ -3323,6 +3492,12 @@ static int is_planned_command(const char *arg) {
     return 0;
 }
 
+// ============================================================================
+// Command: pp browse ? interactive prompt browser (fzf or numbered menu)
+// ============================================================================
+// Handles pp browse.  Opens an interactive prompt browser that uses fzf
+// for fuzzy search with preview when available, or falls back to a numbered
+// menu with view/edit capabilities.
 static int run_browse(int argc, char **argv) {
     char root[PP_PATH_MAX];
     char index_file[PP_PATH_MAX];
@@ -3661,6 +3836,11 @@ static int run_browse(int argc, char **argv) {
     return 0;
 }
 
+// ============================================================================
+// Main entry point ? command dispatch
+// ============================================================================
+// Dispatches the first argument to the appropriate run_* handler.
+// Returns 0 on success, 1 on error, 2 for planned-but-unimplemented commands.
 int pp_cli_run(int argc, char **argv) {
     if (argc <= 1 || is_help_flag(argv[1])) {
         print_help();

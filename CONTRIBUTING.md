@@ -62,3 +62,66 @@ maintenance requests.
 - Keep implementation details out of `include/`.
 - Prefer explicit ownership and cleanup paths.
 - Avoid adding abstractions until repeated use justifies them.
+
+## Comment Style
+
+This section defines the project's comment conventions. The goal is
+consistent, high-signal comments that explain **why** rather than
+restating **what** the code does.
+
+### Public headers (`include/`)
+
+Use Doxygen-style block comments (`/** ... */`) for every public function,
+struct, and macro.  Include `@param` and `@return` tags so that IDEs and
+tools can surface structured documentation on hover.
+
+```c
+/**
+ * Adds two integers and writes the result to out_value.
+ *
+ * @param left      First operand.
+ * @param right     Second operand.
+ * @param out_value Pointer to result storage; must not be NULL.
+ * @return 1 on success, 0 on overflow or NULL out_value.
+ */
+PP_API int pp_add_checked(int left, int right, int *out_value);
+```
+
+For simple accessors a single-line `/** ... */` is acceptable:
+
+```c
+/** Returns the library version compiled into this build. */
+PP_API PP_Version pp_version(void);
+```
+
+### Implementation files (`src/`)
+
+Use `//` line comments throughout `.c` files.  `//` is part of C11 (the
+project's standard) and produces less visual noise than `/* */` for
+everyday editing.
+
+**Section dividers** — mark logical groups of related functions:
+
+```c
+// ============================================================================
+// pp init — initialize a prompt library root
+// ============================================================================
+```
+
+**Function-level comments** — placed immediately before each function
+definition (public entry-points first, then internal helpers):
+
+```c
+// Resolves the library root from --root flag, PROMPTLIB_ROOT env var, or
+// default path.  Writes result to `out` and returns 1 on success.
+static int resolve_root_arg(int start_index, int argc, char **argv,
+                            char *out, size_t out_size) {
+```
+
+**Inline comments** — use sparingly for non-obvious logic:
+
+```c
+if (right > 0 && left > INT_MAX - right) {  // overflow check
+    return 0;
+}
+```
