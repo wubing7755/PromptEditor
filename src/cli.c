@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,6 +28,57 @@
 #include <unistd.h>
 #define mkdir_one(path) mkdir((path), 0755)
 #endif
+
+/*
+ * On Windows, argv[] strings use the system ANSI code page (e.g. GBK on
+ * Chinese Windows).  Convert them to UTF-8 so that files are always
+ * written in a portable encoding.  On other platforms this is a no-op.
+ */
+#ifdef _WIN32
+static char *win32_utf8(const char *ansi) {
+    int wide_len, utf8_len;
+    wchar_t *wide;
+    char *utf8;
+
+    if (ansi == NULL) {
+        return NULL;
+    }
+
+    wide_len = MultiByteToWideChar(CP_ACP, 0, ansi, -1, NULL, 0);
+    if (wide_len == 0) {
+        return NULL;
+    }
+    wide = (wchar_t *)malloc((size_t)wide_len * sizeof(wchar_t));
+    if (wide == NULL) {
+        return NULL;
+    }
+    MultiByteToWideChar(CP_ACP, 0, ansi, -1, wide, wide_len);
+
+    utf8_len = WideCharToMultiByte(CP_UTF8, 0, wide, -1, NULL, 0, NULL, NULL);
+    if (utf8_len == 0) {
+        free(wide);
+        return NULL;
+    }
+    utf8 = (char *)malloc((size_t)utf8_len);
+    if (utf8 == NULL) {
+        free(wide);
+        return NULL;
+    }
+    WideCharToMultiByte(CP_UTF8, 0, wide, -1, utf8, utf8_len, NULL, NULL);
+
+    free(wide);
+    return utf8;
+}
+#define PP_UTF8(s) win32_utf8(s)
+#define PP_UTF8_FREE(s) free((void *)(s))
+#else
+static inline char *pp_utf8_noop(const char *s) {
+    return (char *)s;
+}
+#define PP_UTF8(s) pp_utf8_noop(s)
+#define PP_UTF8_FREE(s) ((void)0)
+#endif
+
 #define PP_CLI_VERSION "0.1.0"
 #define PP_PATH_MAX 4096
 #define PP_FIELD_MAX 512
@@ -1617,7 +1669,15 @@ static int run_add(int argc, char **argv) {
         return 1;
     }
 
-    prompt_id_from_title(options.title, id, sizeof(id));
+    /* Convert title to UTF-8 first so the prompt ID is generated from
+     * portable UTF-8 bytes rather than the system code page. */
+    {
+        char *u_title = PP_UTF8(options.title);
+        const char *title_utf8 = u_title ? u_title : options.title;
+
+        prompt_id_from_title(title_utf8, id, sizeof(id));
+        PP_UTF8_FREE(u_title);
+    }
     current_timestamp(timestamp, sizeof(timestamp));
 
     if (!join_path(prompts_dir, sizeof(prompts_dir), root, "prompts") ||
@@ -1636,44 +1696,96 @@ static int run_add(int argc, char **argv) {
         return 1;
     }
 
-    snprintf(metadata, sizeof(metadata),
-             "id\t%s\n"
-             "title\t%s\n"
-             "folder\t%s\n"
-             "category\t%s\n"
-             "created_at\t%s\n"
-             "updated_at\t%s\n"
-             "current_version\t1\n"
-             "tag\t%s\n"
-             "description\t%s\n",
-             id, options.title, options.folder, options.category, timestamp, timestamp,
-             options.tags, options.description == NULL ? "" : options.description);
+    /* Convert user-facing strings from the system code page to UTF-8 on Windows. */
+    {
+        char *u_title = PP_UTF8(options.title);
+        char *u_body = PP_UTF8(options.editor ? NULL : options.body);
+        char *u_folder = PP_UTF8(options.folder);
+        char *u_cat = PP_UTF8(options.category);
+        char *u_tags = PP_UTF8(options.tags_set ? options.tags : NULL);
+        char *u_desc = PP_UTF8(options.description);
 
-    snprintf(index_row, sizeof(index_row), "%s\t%s\t%s\t%s\t%s\t%s\n", id, options.title,
-             options.folder, options.category, options.tags, timestamp);
+        const char *title = u_title ? u_title : options.title;
+        const char *body = options.editor ? options.body : (u_body ? u_body : options.body);
+        const char *folder = u_folder ? u_folder : options.folder;
+        const char *cat = u_cat ? u_cat : options.category;
+        const char *tags = u_tags ? u_tags : options.tags;
+        const char *desc = u_desc ? u_desc : (options.description ? options.description : "");
 
-    if (!make_dir_recursive(prompt_dir)) {
-        return 1;
-    }
+        snprintf(metadata, sizeof(metadata),
+                 "id\t%s\n"
+                 "title\t%s\n"
+                 "folder\t%s\n"
+                 "category\t%s\n"
+                 "created_at\t%s\n"
+                 "updated_at\t%s\n"
+                 "current_version\t1\n"
+                 "tag\t%s\n"
+                 "description\t%s\n",
+                 id, title, folder, cat, timestamp, timestamp, tags,
+                 options.description == NULL ? "" : desc);
 
-    if (options.editor) {
-        char edited_body[PP_BODY_MAX];
-        if (!spawn_editor(options.body == NULL ? "" : options.body, edited_body,
-                          sizeof(edited_body)) ||
-            !write_text_file(body_file, edited_body)) {
+        snprintf(index_row, sizeof(index_row), "%s\t%s\t%s\t%s\t%s\t%s\n", id, title, folder, cat,
+                 tags, timestamp);
+
+        if (!make_dir_recursive(prompt_dir)) {
+            PP_UTF8_FREE(u_title);
+            PP_UTF8_FREE(u_body);
+            PP_UTF8_FREE(u_folder);
+            PP_UTF8_FREE(u_cat);
+            PP_UTF8_FREE(u_tags);
+            PP_UTF8_FREE(u_desc);
             return 1;
         }
-    } else if (!write_text_file(body_file, options.body)) {
-        return 1;
-    }
 
-    if (!write_text_file(metadata_file, metadata) || !append_text_file(index_file, index_row)) {
-        return 1;
-    }
+        if (options.editor) {
+            char edited_body[PP_BODY_MAX];
+            if (!spawn_editor(body == NULL ? "" : body, edited_body, sizeof(edited_body)) ||
+                !write_text_file(body_file, edited_body)) {
+                PP_UTF8_FREE(u_title);
+                PP_UTF8_FREE(u_body);
+                PP_UTF8_FREE(u_folder);
+                PP_UTF8_FREE(u_cat);
+                PP_UTF8_FREE(u_tags);
+                PP_UTF8_FREE(u_desc);
+                return 1;
+            }
+        } else if (!write_text_file(body_file, body)) {
+            PP_UTF8_FREE(u_title);
+            PP_UTF8_FREE(u_body);
+            PP_UTF8_FREE(u_folder);
+            PP_UTF8_FREE(u_cat);
+            PP_UTF8_FREE(u_tags);
+            PP_UTF8_FREE(u_desc);
+            return 1;
+        }
 
-    if (!registry_add(root, "folder", options.folder) ||
-        !registry_add(root, "category", options.category)) {
-        return 1;
+        if (!write_text_file(metadata_file, metadata) || !append_text_file(index_file, index_row)) {
+            PP_UTF8_FREE(u_title);
+            PP_UTF8_FREE(u_body);
+            PP_UTF8_FREE(u_folder);
+            PP_UTF8_FREE(u_cat);
+            PP_UTF8_FREE(u_tags);
+            PP_UTF8_FREE(u_desc);
+            return 1;
+        }
+
+        if (!registry_add(root, "folder", folder) || !registry_add(root, "category", cat)) {
+            PP_UTF8_FREE(u_title);
+            PP_UTF8_FREE(u_body);
+            PP_UTF8_FREE(u_folder);
+            PP_UTF8_FREE(u_cat);
+            PP_UTF8_FREE(u_tags);
+            PP_UTF8_FREE(u_desc);
+            return 1;
+        }
+
+        PP_UTF8_FREE(u_title);
+        PP_UTF8_FREE(u_body);
+        PP_UTF8_FREE(u_folder);
+        PP_UTF8_FREE(u_cat);
+        PP_UTF8_FREE(u_tags);
+        PP_UTF8_FREE(u_desc);
     }
 
     printf("Saved prompt: %s\n", id);
@@ -2258,75 +2370,156 @@ static int run_edit(int argc, char **argv) {
         return 1;
     }
 
-    current_timestamp(timestamp, sizeof(timestamp));
-    snprintf(row.updated_at, sizeof(row.updated_at), "%s", timestamp);
-    if (options.category != NULL) {
-        if (field_is_too_long(options.category) || field_has_unsupported_chars(options.category)) {
-            fprintf(stderr, "Category contains unsupported characters.\n");
+    /* Convert user-facing strings to UTF-8 on Windows. */
+    {
+        char *u_title = PP_UTF8(options.title);
+        char *u_body = PP_UTF8(options.body);
+        char *u_cat = PP_UTF8(options.category);
+        char *u_tags = PP_UTF8(options.tags_set ? options.tags : NULL);
+        char *u_desc = PP_UTF8(options.description);
+        char *u_folder = PP_UTF8(options.folder);
+
+#define EDIT_UTF8(field, src)                                                                      \
+    do {                                                                                           \
+        const char *v = (src);                                                                     \
+        if (v != NULL)                                                                             \
+            snprintf(row.field, sizeof(row.field), "%s", v);                                       \
+    } while (0)
+
+        current_timestamp(timestamp, sizeof(timestamp));
+        snprintf(row.updated_at, sizeof(row.updated_at), "%s", timestamp);
+        if (options.category != NULL) {
+            if (field_is_too_long(options.category) ||
+                field_has_unsupported_chars(options.category)) {
+                PP_UTF8_FREE(u_title);
+                PP_UTF8_FREE(u_body);
+                PP_UTF8_FREE(u_cat);
+                PP_UTF8_FREE(u_tags);
+                PP_UTF8_FREE(u_desc);
+                PP_UTF8_FREE(u_folder);
+                fprintf(stderr, "Category contains unsupported characters.\n");
+                return 1;
+            }
+            EDIT_UTF8(category, u_cat ? u_cat : options.category);
+        }
+        if (options.tags_set) {
+            EDIT_UTF8(tags, u_tags ? u_tags : options.tags);
+        }
+        if (options.title != NULL) {
+            if (field_is_too_long(options.title) || field_has_unsupported_chars(options.title)) {
+                PP_UTF8_FREE(u_title);
+                PP_UTF8_FREE(u_body);
+                PP_UTF8_FREE(u_cat);
+                PP_UTF8_FREE(u_tags);
+                PP_UTF8_FREE(u_desc);
+                PP_UTF8_FREE(u_folder);
+                fprintf(stderr, "Title contains unsupported characters.\n");
+                return 1;
+            }
+            EDIT_UTF8(title, u_title ? u_title : options.title);
+        }
+        if (options.folder != NULL) {
+            if (field_is_too_long(options.folder) || field_has_unsupported_chars(options.folder) ||
+                path_has_unsafe_segment(options.folder)) {
+                PP_UTF8_FREE(u_title);
+                PP_UTF8_FREE(u_body);
+                PP_UTF8_FREE(u_cat);
+                PP_UTF8_FREE(u_tags);
+                PP_UTF8_FREE(u_desc);
+                PP_UTF8_FREE(u_folder);
+                fprintf(stderr, "Folder contains unsupported characters.\n");
+                return 1;
+            }
+            EDIT_UTF8(folder, u_folder ? u_folder : options.folder);
+        }
+
+        if (!prompt_body_path(body_file, sizeof(body_file), root, &row)) {
+            PP_UTF8_FREE(u_title);
+            PP_UTF8_FREE(u_body);
+            PP_UTF8_FREE(u_cat);
+            PP_UTF8_FREE(u_tags);
+            PP_UTF8_FREE(u_desc);
+            PP_UTF8_FREE(u_folder);
             return 1;
         }
-        snprintf(row.category, sizeof(row.category), "%s", options.category);
-    }
-    if (options.tags_set) {
-        snprintf(row.tags, sizeof(row.tags), "%s", options.tags);
-    }
-    if (options.title != NULL) {
-        if (field_is_too_long(options.title) || field_has_unsupported_chars(options.title)) {
-            fprintf(stderr, "Title contains unsupported characters.\n");
+
+        if (edit_mode) {
+            char current_body[PP_BODY_MAX];
+            if (!read_text_file(body_file, current_body, sizeof(current_body)) ||
+                !spawn_editor(current_body, edited_body, sizeof(edited_body)) ||
+                !write_text_file(body_file, edited_body)) {
+                PP_UTF8_FREE(u_title);
+                PP_UTF8_FREE(u_body);
+                PP_UTF8_FREE(u_cat);
+                PP_UTF8_FREE(u_tags);
+                PP_UTF8_FREE(u_desc);
+                PP_UTF8_FREE(u_folder);
+                return 1;
+            }
+        } else if (options.body != NULL) {
+            const char *body = u_body ? u_body : options.body;
+            if (!write_text_file(body_file, body)) {
+                PP_UTF8_FREE(u_title);
+                PP_UTF8_FREE(u_body);
+                PP_UTF8_FREE(u_cat);
+                PP_UTF8_FREE(u_tags);
+                PP_UTF8_FREE(u_desc);
+                PP_UTF8_FREE(u_folder);
+                return 1;
+            }
+        }
+
+        if (!prompt_metadata_path(metadata_file, sizeof(metadata_file), root, &row)) {
+            PP_UTF8_FREE(u_title);
+            PP_UTF8_FREE(u_body);
+            PP_UTF8_FREE(u_cat);
+            PP_UTF8_FREE(u_tags);
+            PP_UTF8_FREE(u_desc);
+            PP_UTF8_FREE(u_folder);
             return 1;
         }
-        snprintf(row.title, sizeof(row.title), "%s", options.title);
-    }
-    if (options.folder != NULL) {
-        if (field_is_too_long(options.folder) || field_has_unsupported_chars(options.folder) ||
-            path_has_unsafe_segment(options.folder)) {
-            fprintf(stderr, "Folder contains unsupported characters.\n");
+
+        snprintf(metadata, sizeof(metadata),
+                 "id\t%s\n"
+                 "title\t%s\n"
+                 "folder\t%s\n"
+                 "category\t%s\n"
+                 "updated_at\t%s\n"
+                 "current_version\t1\n"
+                 "tag\t%s\n"
+                 "description\t%s\n",
+                 row.id, row.title, row.folder, row.category, row.updated_at, row.tags,
+                 u_desc ? u_desc : (options.description == NULL ? "" : options.description));
+
+        if (!write_text_file(metadata_file, metadata) || !rewrite_index_row(root, &row, 0)) {
+            PP_UTF8_FREE(u_title);
+            PP_UTF8_FREE(u_body);
+            PP_UTF8_FREE(u_cat);
+            PP_UTF8_FREE(u_tags);
+            PP_UTF8_FREE(u_desc);
+            PP_UTF8_FREE(u_folder);
             return 1;
         }
-        snprintf(row.folder, sizeof(row.folder), "%s", options.folder);
-    }
 
-    if (!prompt_body_path(body_file, sizeof(body_file), root, &row)) {
-        return 1;
-    }
-
-    if (edit_mode) {
-        char current_body[PP_BODY_MAX];
-        if (!read_text_file(body_file, current_body, sizeof(current_body)) ||
-            !spawn_editor(current_body, edited_body, sizeof(edited_body)) ||
-            !write_text_file(body_file, edited_body)) {
+        if (!registry_add(root, "category", row.category) ||
+            !registry_add(root, "folder", row.folder)) {
+            PP_UTF8_FREE(u_title);
+            PP_UTF8_FREE(u_body);
+            PP_UTF8_FREE(u_cat);
+            PP_UTF8_FREE(u_tags);
+            PP_UTF8_FREE(u_desc);
+            PP_UTF8_FREE(u_folder);
             return 1;
         }
-    } else if (options.body != NULL) {
-        if (!write_text_file(body_file, options.body)) {
-            return 1;
-        }
-    }
 
-    if (!prompt_metadata_path(metadata_file, sizeof(metadata_file), root, &row)) {
-        return 1;
+        PP_UTF8_FREE(u_title);
+        PP_UTF8_FREE(u_body);
+        PP_UTF8_FREE(u_cat);
+        PP_UTF8_FREE(u_tags);
+        PP_UTF8_FREE(u_desc);
+        PP_UTF8_FREE(u_folder);
     }
-
-    snprintf(metadata, sizeof(metadata),
-             "id\t%s\n"
-             "title\t%s\n"
-             "folder\t%s\n"
-             "category\t%s\n"
-             "updated_at\t%s\n"
-             "current_version\t1\n"
-             "tag\t%s\n"
-             "description\t%s\n",
-             row.id, row.title, row.folder, row.category, row.updated_at, row.tags,
-             options.description == NULL ? "" : options.description);
-
-    if (!write_text_file(metadata_file, metadata) || !rewrite_index_row(root, &row, 0)) {
-        return 1;
-    }
-
-    if (!registry_add(root, "category", row.category) ||
-        !registry_add(root, "folder", row.folder)) {
-        return 1;
-    }
+#undef EDIT_UTF8
 
     printf("Updated prompt: %s\n", row.id);
     return 0;
@@ -2506,19 +2699,33 @@ static int run_optimize(int argc, char **argv) {
         return 1;
     }
 
-    snprintf(version_metadata, sizeof(version_metadata),
-             "version\t%s\n"
-             "created_at\t%s\n"
-             "promoted\t%s\n"
-             "note\t%s\n",
-             version, timestamp, options.promote ? "yes" : "no",
-             options.note == NULL ? "" : options.note);
+    /* Convert user-facing strings to UTF-8 on Windows. */
+    {
+        char *u_body = PP_UTF8(options.body);
+        char *u_note = PP_UTF8(options.note);
+        const char *body_val = u_body ? u_body : options.body;
+        const char *note_val = u_note ? u_note : options.note;
+        int write_ok;
 
-    if (!write_text_file(version_body_file, options.body) ||
-        !write_text_file(version_metadata_file, version_metadata) ||
-        !append_version_index(root, &row, version, timestamp, options.promote ? "yes" : "no",
-                              options.note)) {
-        return 1;
+        snprintf(version_metadata, sizeof(version_metadata),
+                 "version\t%s\n"
+                 "created_at\t%s\n"
+                 "promoted\t%s\n"
+                 "note\t%s\n",
+                 version, timestamp, options.promote ? "yes" : "no",
+                 note_val == NULL ? "" : note_val);
+
+        write_ok = write_text_file(version_body_file, body_val) &&
+                   write_text_file(version_metadata_file, version_metadata) &&
+                   append_version_index(root, &row, version, timestamp,
+                                        options.promote ? "yes" : "no", note_val);
+
+        PP_UTF8_FREE(u_body);
+        PP_UTF8_FREE(u_note);
+
+        if (!write_ok) {
+            return 1;
+        }
     }
 
     if (options.promote) {
