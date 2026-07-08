@@ -30,7 +30,7 @@ case "$(uname -s 2>/dev/null || echo unknown)" in
     BINARY_NAME="pp"
     ;;
   MINGW*|MSYS*|CYGWIN*)
-    DEFAULT_PREFIX="${LOCALAPPDATA:-$HOME/AppData/Local}/Programs/pp"
+    DEFAULT_PREFIX="${LOCALAPPDATA:-$HOME/AppData/Local}/Programs/PromptEditor"
     BINARY_NAME="pp.exe"
     ;;
   *)
