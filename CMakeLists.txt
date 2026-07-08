@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(PromptEditor
-    VERSION 0.1.0
+    VERSION 0.1.1
     DESCRIPTION "A compact C11 project template and engineering standard"
     LANGUAGES C
 )
