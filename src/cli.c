@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,7 +59,7 @@ static char *win32_utf8(const char *ansi) {
         free(wide);
         return NULL;
     }
-    utf8 = (char *)malloc(utf8_len);
+    utf8 = (char *)malloc((size_t)utf8_len);
     if (utf8 == NULL) {
         free(wide);
         return NULL;
