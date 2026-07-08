@@ -476,7 +476,6 @@ static int copy_file_if_exists(const char *source, const char *destination) {
 
 static int config_file_path(char *out, size_t out_size) {
     const char *home;
-    char config_dir[PP_PATH_MAX];
 #ifdef _WIN32
     home = getenv("USERPROFILE");
 #else
@@ -485,13 +484,7 @@ static int config_file_path(char *out, size_t out_size) {
     if (home == NULL || home[0] == '\0') {
         return 0;
     }
-    if (!join_path(config_dir, sizeof(config_dir), home, ".prompteditor")) {
-        return 0;
-    }
-    if (!make_dir_if_missing(config_dir)) {
-        return 0;
-    }
-    return join_path(out, out_size, config_dir, "config");
+    return join_path(out, out_size, home, ".promptconfig");
 }
 
 static int default_root(char *out, size_t out_size) {
@@ -549,7 +542,7 @@ static int default_root(char *out, size_t out_size) {
     }
 
     /*
-     * 2. Check the saved default root (~/.prompteditor/config).
+     * 2. Check the saved default root (~/.promptconfig).
      *    pp init writes this automatically so commands run from
      *    unrelated directories still find the library.
      */
