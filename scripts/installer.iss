@@ -1,4 +1,4 @@
-; PromptEditor — Inno Setup installer script
+; PromptLib — Inno Setup installer script
 ;
 ; Generates a graphical Windows installer (pp-setup-<version>.exe).
 ;
@@ -11,10 +11,10 @@
 ; Or with a version override:
 ;   iscc /DAppVersion=0.2.0 scripts\installer.iss
 
-#define AppName     "PromptEditor"
+#define AppName     "PromptLib"
 #define AppExeName  "pp.exe"
-#define AppPublisher "PromptEditor Contributors"
-#define AppURL       "https://github.com/wubing7755/PromptEditor"
+#define AppPublisher "PromptLib Contributors"
+#define AppURL       "https://github.com/wubing7755/PromptLib"
 
 ; Version — read from CMakeLists.txt, or override with /DAppVersion=X.Y.Z
 #ifndef AppVersion
@@ -82,9 +82,9 @@ Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 ; Start Menu
-Name: "{group}\PromptEditor"; Filename: "{app}\{#AppExeName}"; Parameters: "--help"
-Name: "{group}\PromptEditor (interactive)"; Filename: "{app}\{#AppExeName}"; Parameters: "browse"
-Name: "{group}\Uninstall PromptEditor"; Filename: "{uninstallexe}"
+Name: "{group}\PromptLib"; Filename: "{app}\{#AppExeName}"; Parameters: "--help"
+Name: "{group}\PromptLib (interactive)"; Filename: "{app}\{#AppExeName}"; Parameters: "browse"
+Name: "{group}\Uninstall PromptLib"; Filename: "{uninstallexe}"
 
 [Run]
 ; Launch interactive help on finish

@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Release script — build, test, and package PromptEditor for distribution.
+# Release script — build, test, and package PromptLib for distribution.
 #
 # Usage:
 #   ./scripts/release.sh              # default: ninja-release preset
@@ -22,7 +22,7 @@ cd "$REPO_ROOT"
 show_usage() {
   echo "Usage: $0 [options]"
   echo ""
-  echo "Builds PromptEditor in release mode, runs tests, and packages the"
+  echo "Builds PromptLib in release mode, runs tests, and packages the"
   echo "binary into a distributable archive under dist/."
   echo ""
   echo "Options:"
@@ -53,7 +53,7 @@ done
 
 # Determine version from CMake project() if not provided
 if [ -z "$VERSION" ]; then
-  VERSION=$(awk '/project\(PromptEditor/,/\)/ {
+  VERSION=$(awk '/project\(PromptLib/,/\)/ {
       if ($1 == "VERSION") { print $2; exit }
   }' "$REPO_ROOT/CMakeLists.txt")
   if [ -z "$VERSION" ]; then
@@ -82,7 +82,7 @@ BUILD_DIR="build/$PRESET"
 DIST_DIR="$REPO_ROOT/dist"
 ARCHIVE_NAME="pp-${VERSION}-${PLATFORM}"
 
-echo "=== PromptEditor Release Build ==="
+echo "=== PromptLib Release Build ==="
 echo "  Preset:   $PRESET"
 echo "  Version:  $VERSION"
 echo "  Platform: $PLATFORM"

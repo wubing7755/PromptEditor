@@ -212,11 +212,11 @@ for the full policy.
 
 ## Add A Source File
 
-Add implementation files under `src/prompteditor/` and public headers under
-`include/prompteditor/`.
+Add implementation files under `src/promptlib/` and public headers under
+`include/promptlib/`.
 
-1. Create the `.c` file under `src/prompteditor/`.
-2. Create or update the matching public header under `include/prompteditor/`.
+1. Create the `.c` file under `src/promptlib/`.
+2. Create or update the matching public header under `include/promptlib/`.
 3. Add the new `.c` file to `PP_CORE_SOURCES` in `cmake/Sources.cmake`.
 4. Add tests under `tests/`.
 5. Run `./scripts/check.ps1` or `./scripts/check.sh`.
@@ -233,7 +233,7 @@ pp_add_test(pp_feature_tests
     SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_feature.c
     LIBS
-        prompteditor_core
+        promptlib_core
 )
 ```
 
@@ -259,8 +259,8 @@ cmake --install build/ninja-release --config Release --prefix install
 A downstream CMake project can then consume it:
 
 ```cmake
-find_package(PromptEditor CONFIG REQUIRED)
-target_link_libraries(app PRIVATE PromptEditor::prompteditor_core)
+find_package(PromptLib CONFIG REQUIRED)
+target_link_libraries(app PRIVATE PromptLib::promptlib_core)
 ```
 
 Validate with the package smoke test (`.ps1` on Windows):
@@ -277,8 +277,8 @@ copy the installed DLL next to the test executable or add it to `PATH`.
 ## Use As A Subproject
 
 ```cmake
-add_subdirectory(path/to/PromptEditor)
-target_link_libraries(app PRIVATE PromptEditor::prompteditor_core)
+add_subdirectory(path/to/PromptLib)
+target_link_libraries(app PRIVATE PromptLib::promptlib_core)
 ```
 
 When included as a subproject, examples, tests, and install rules default to off.
@@ -295,10 +295,10 @@ ctest --test-dir build/subproject-smoke --output-on-failure
 The project version is declared once:
 
 ```cmake
-project(PromptEditor VERSION 0.1.0 LANGUAGES C)
+project(PromptLib VERSION 0.1.0 LANGUAGES C)
 ```
 
-CMake generates `prompteditor/version.h` from that value. Source files should use the
+CMake generates `promptlib/version.h` from that value. Source files should use the
 generated macros instead of duplicating literal version numbers.
 
 ## Local Quality Checks
@@ -360,9 +360,9 @@ VS Code builds `ALL_BUILD` with Ninja:
   still cached, run `CMake: Reset CMake Tools Extension State`, then
   `CMake: Delete Cache and Reconfigure`.
 
-`find_package(PromptEditor)` cannot find the package:
+`find_package(PromptLib)` cannot find the package:
 
-- Symptom: CMake cannot find `PromptEditorConfig.cmake`.
+- Symptom: CMake cannot find `PromptLibConfig.cmake`.
 - Fix: install the project first and pass the absolute install prefix with
   `-DCMAKE_PREFIX_PATH=/path/to/install`.
 

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(PromptEditor
+project(PromptLib
     VERSION 0.1.1
     DESCRIPTION "A compact C11 project template and engineering standard"
     LANGUAGES C
@@ -33,8 +33,8 @@ option(PP_INSTALL "Generate install rules" ${PP_IS_TOP_LEVEL_DEFAULT})
 
 set(PP_GENERATED_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated/include")
 configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/prompteditor_version.h.in"
-    "${PP_GENERATED_INCLUDE_DIR}/prompteditor/version.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/promptlib_version.h.in"
+    "${PP_GENERATED_INCLUDE_DIR}/promptlib/version.h"
     @ONLY
 )
 
@@ -42,33 +42,33 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/CompilerOptions.cmake")
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Dependencies.cmake")
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Sources.cmake")
 
-add_library(prompteditor_core ${PP_CORE_SOURCES})
-add_library(PromptEditor::prompteditor_core ALIAS prompteditor_core)
+add_library(promptlib_core ${PP_CORE_SOURCES})
+add_library(PromptLib::promptlib_core ALIAS promptlib_core)
 
-target_compile_features(prompteditor_core PUBLIC c_std_11)
+target_compile_features(promptlib_core PUBLIC c_std_11)
 
-target_compile_definitions(prompteditor_core
+target_compile_definitions(promptlib_core
     PRIVATE
         PP_BUILDING_LIBRARY
 )
 if(BUILD_SHARED_LIBS)
-    target_compile_definitions(prompteditor_core PUBLIC PP_SHARED)
+    target_compile_definitions(promptlib_core PUBLIC PP_SHARED)
 endif()
-set_target_properties(prompteditor_core PROPERTIES
+set_target_properties(promptlib_core PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
-target_include_directories(prompteditor_core
+target_include_directories(promptlib_core
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PP_GENERATED_INCLUDE_DIR}>
         $<INSTALL_INTERFACE:include>
 )
-pp_target_defaults(prompteditor_core)
+pp_target_defaults(promptlib_core)
 
 if(PP_BUILD_EXAMPLE)
     add_executable(pp ${pp_SOURCES})
-    target_link_libraries(pp PRIVATE prompteditor_core)
+    target_link_libraries(pp PRIVATE promptlib_core)
     pp_target_defaults(pp)
     set_target_properties(pp PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"

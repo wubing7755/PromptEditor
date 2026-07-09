@@ -1,4 +1,4 @@
-# Software Requirements Specification — PromptEditor
+# Software Requirements Specification — PromptLib
 
 **Version:** 1.0 &nbsp;|&nbsp; **Date:** 2026-07-07 &nbsp;|&nbsp; **Status:** Draft
 
@@ -20,14 +20,14 @@
 
 ### 1.1 Purpose
 
-PromptEditor is a pure C11 command-line application for saving, organizing, retrieving,
+PromptLib is a pure C11 command-line application for saving, organizing, retrieving,
 browsing, and improving prompt templates in a local file-backed library. This document
-defines the functional and non-functional requirements for PromptEditor.
+defines the functional and non-functional requirements for PromptLib.
 
 ### 1.2 Scope
 
 - A CLI executable (`pp`) with 18 sub-commands for prompt lifecycle management.
-- A reusable C library (`prompteditor_core`) installable via CMake `find_package`.
+- A reusable C library (`promptlib_core`) installable via CMake `find_package`.
 - A human-readable, file-based storage format requiring no database server.
 - Cross-platform support for Windows, Linux, and macOS on MSVC, GCC, Clang, and AppleClang.
 
@@ -138,7 +138,7 @@ Implementation status is tracked in [§7.3 Planned Requirements](#73-planned-req
 
 ### 2.1 Product Perspective
 
-PromptEditor is a standalone CLI tool with no network dependency. It operates on
+PromptLib is a standalone CLI tool with no network dependency. It operates on
 local files and ships as an installable C library.
 
 ### 2.2 User Characteristics
@@ -149,7 +149,7 @@ local files and ships as an installable C library.
 | **Prompt Author** | Creates and edits prompt content |
 | **Library Administrator** | Manages folders, categories, exports, imports, backups |
 | **Script Author** | Consumes `pp` output via `--json` or `--raw` |
-| **Downstream Developer** | Links `PromptEditor::prompteditor_core` |
+| **Downstream Developer** | Links `PromptLib::promptlib_core` |
 | **Build Engineer** | Configures, builds, and installs the project |
 | **QA Engineer** | Maintains and runs the test suite |
 | **CI System** | Automated pipelines |
@@ -1849,7 +1849,7 @@ Desc   debug, release, shared, asan, coverage presets work with any CMake genera
 
 ```
 Title  Installable CMake package
-Desc   cmake --install → find_package(PromptEditor CONFIG REQUIRED) downstream.
+Desc   cmake --install → find_package(PromptLib CONFIG REQUIRED) downstream.
 ```
 
 ### REQ-F-108 🟡 [Build Engineer]
@@ -1991,7 +1991,7 @@ graph TD
 | NFR-005 | 🟡 | Performance | Search 10,000 prompts ≤ 5 seconds |
 | NFR-006 | 🟡 | Performance | Binary ≤ 500 KB (stripped) |
 | NFR-007 | 🔴 | Dependencies | `pp` has zero external runtime dependencies |
-| NFR-008 | 🔴 | Dependencies | `prompteditor_core` has zero external link-time dependencies |
+| NFR-008 | 🔴 | Dependencies | `promptlib_core` has zero external link-time dependencies |
 | NFR-009 | 🟡 | Security | Atomic rename for file writes |
 | NFR-010 | 🟡 | Security | Path validation prevents directory traversal |
 | NFR-011 | 🟡 | Security | No shell execution beyond `$EDITOR` / `$PAGER` |
@@ -2036,7 +2036,7 @@ PP_API const char *pp_platform_name(void);
 
 ### 6.4 CMake
 
-**Target**: `PromptEditor::prompteditor_core`
+**Target**: `PromptLib::promptlib_core`
 
 | Option | Top-level | Subproject |
 |--------|:---:|:---:|
@@ -2120,7 +2120,7 @@ The following requirements are specified but deferred to a future release:
 - `docs/mvp.md` — Functional specification
 - `docs/storage-format.md` — Storage layout
 - `src/cli.c` — Implemented behaviors
-- `include/prompteditor/example.h` — Public API
+- `include/promptlib/example.h` — Public API
 - `CMakeLists.txt`, `cmake/*.cmake` — Build
 - `C_PROJECT_STANDARD.md` — Engineering standards
 - `.github/workflows/` — CI/CD

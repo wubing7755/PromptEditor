@@ -139,7 +139,7 @@ CI 运行 clang-format、clang-tidy、cppcheck 和 YAML 检查：
 **VS Code 使用 Ninja 构建 `ALL_BUILD` 失败：**
 - 解决：运行 `CMake: Set Build Target` 选择 `all`
 
-**找不到 `find_package(PromptEditor)`：**
+**找不到 `find_package(PromptLib)`：**
 - 解决：先安装项目，传递 `-DCMAKE_PREFIX_PATH=/path/to/install`
 
 **Windows 动态库测试找不到 DLL：**

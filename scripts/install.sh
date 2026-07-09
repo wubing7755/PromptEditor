@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Install script — copy PromptEditor binary to a user-chosen location
+# Install script — copy PromptLib binary to a user-chosen location
 # and optionally add it to PATH.
 #
 # Usage:
@@ -30,7 +30,7 @@ case "$(uname -s 2>/dev/null || echo unknown)" in
     BINARY_NAME="pp"
     ;;
   MINGW*|MSYS*|CYGWIN*)
-    DEFAULT_PREFIX="${LOCALAPPDATA:-$HOME/AppData/Local}/Programs/PromptEditor"
+    DEFAULT_PREFIX="${LOCALAPPDATA:-$HOME/AppData/Local}/Programs/PromptLib"
     BINARY_NAME="pp.exe"
     ;;
   *)
@@ -42,7 +42,7 @@ esac
 show_usage() {
   echo "Usage: $0 [options]"
   echo ""
-  echo "Installs the PromptEditor (pp) binary to the specified location."
+  echo "Installs the PromptLib (pp) binary to the specified location."
   echo ""
   echo "Options:"
   echo "  --prefix <path>   Install directory (default: $DEFAULT_PREFIX)"
@@ -88,7 +88,7 @@ if [ ! -f "$BINARY_SRC" ]; then
   exit 1
 fi
 
-echo "=== PromptEditor Install ==="
+echo "=== PromptLib Install ==="
 echo "  Source:  $BINARY_SRC"
 echo "  Prefix:  $PREFIX"
 echo ""

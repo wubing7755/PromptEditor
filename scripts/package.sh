@@ -60,7 +60,7 @@ done
 
 # Resolve version
 if [ -z "$VERSION" ]; then
-  VERSION=$(awk '/project\(PromptEditor/,/\)/ {
+  VERSION=$(awk '/project\(PromptLib/,/\)/ {
       if ($1 == "VERSION") { print $2; exit }
   }' "$REPO_ROOT/CMakeLists.txt")
   if [ -z "$VERSION" ]; then
@@ -151,10 +151,10 @@ Version: ${VERSION}
 Section: utils
 Priority: optional
 Architecture: ${DEB_ARCH}
-Maintainer: PromptEditor Contributors
-Homepage: https://github.com/wubing7755/PromptEditor
+Maintainer: PromptLib Contributors
+Homepage: https://github.com/wubing7755/PromptLib
 Description: Pure C prompt management CLI
- PromptEditor (pp) is a command-line tool for saving, organizing,
+ PromptLib (pp) is a command-line tool for saving, organizing,
  retrieving, browsing, and improving prompt templates in a local
  file-backed library. It requires no database server and has zero
  external dependencies.
@@ -167,10 +167,10 @@ EOF
   # Copyright
   cat > "$SHARE_DIR/copyright" << EOF
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Source: https://github.com/wubing7755/PromptEditor
+Source: https://github.com/wubing7755/PromptLib
 
 Files: *
-Copyright: $(date +%Y) PromptEditor Contributors
+Copyright: $(date +%Y) PromptLib Contributors
 License: MIT
 EOF
 
@@ -211,7 +211,7 @@ build_dmg() {
 
   # Create a README for the DMG window
   cat > "$STAGING/README.txt" << EOF
-PromptEditor ${VERSION}
+PromptLib ${VERSION}
 
 Installation:
   Drag the "pp" binary to /usr/local/bin to install system-wide, or to
@@ -231,7 +231,7 @@ EOF
 
   # Build DMG
   if command -v hdiutil >/dev/null 2>&1; then
-    hdiutil create -volname "PromptEditor ${VERSION}" \
+    hdiutil create -volname "PromptLib ${VERSION}" \
       -srcfolder "$STAGING" \
       -ov -format UDZO \
       "$DMG_DIR" >/dev/null
@@ -242,7 +242,7 @@ EOF
     echo ""
     echo "  To install on macOS:"
     echo "    open ${DMG_NAME}.dmg"
-    echo "    cp /Volumes/PromptEditor\\ ${VERSION}/pp /usr/local/bin/"
+    echo "    cp /Volumes/PromptLib\\ ${VERSION}/pp /usr/local/bin/"
   else
     echo "ERROR: hdiutil not found. This script must run on macOS." >&2
     exit 1
