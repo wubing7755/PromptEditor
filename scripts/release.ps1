@@ -28,7 +28,7 @@ function Invoke-CheckedCommand {
 # Determine version from CMakeLists.txt if not provided
 if (-not $Version) {
     $cmakeContent = Get-Content "CMakeLists.txt" -Raw
-    if ($cmakeContent -match 'project\(PromptEditor\s+VERSION\s+([0-9.]+)') {
+    if ($cmakeContent -match 'project\(PromptLib\s+VERSION\s+([0-9.]+)') {
         $Version = $Matches[1]
     } else {
         $Version = "0.0.0"
@@ -50,7 +50,7 @@ $BuildDir = "build\$Preset"
 $DistDir = Join-Path $RepoRoot "dist"
 $ArchiveName = "pp-${Version}-${Platform}"
 
-Write-Host "=== PromptEditor Release Build ==="
+Write-Host "=== PromptLib Release Build ==="
 Write-Host "  Preset:   $Preset"
 Write-Host "  Version:  $Version"
 Write-Host "  Platform: $Platform"

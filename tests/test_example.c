@@ -1,5 +1,5 @@
-#include <prompteditor/example.h>
-#include <prompteditor/version.h>
+#include <promptlib/example.h>
+#include <promptlib/version.h>
 
 #include "test_assert.h"
 

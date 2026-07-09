@@ -1,4 +1,4 @@
-#include <prompteditor/cli.h>
+#include <promptlib/cli.h>
 
 #include <ctype.h>
 #include <errno.h>

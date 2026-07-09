@@ -41,5 +41,5 @@ pp_add_test(pp_tests
     SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_example.c
     LIBS
-        prompteditor_core
+        promptlib_core
 )

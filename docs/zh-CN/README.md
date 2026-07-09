@@ -1,6 +1,6 @@
-# PromptEditor 文档
+# PromptLib 文档
 
-项目架构与源码导览：[GitHub](https://github.com/wubing7755/PromptEditor)
+项目架构与源码导览：[GitHub](https://github.com/wubing7755/PromptLib)
 
 ---
 

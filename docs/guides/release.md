@@ -132,14 +132,14 @@ Installing from the disk image:
 
 ```sh
 open dist/pp-0.2.0.dmg
-cp /Volumes/PromptEditor\ 0.2.0/pp /usr/local/bin/
+cp /Volumes/PromptLib\ 0.2.0/pp /usr/local/bin/
 ```
 
 ## Release Checklist
 
 Before tagging a release:
 
-1. **Update version** in `CMakeLists.txt` (`project(PromptEditor VERSION X.Y.Z)`).
+1. **Update version** in `CMakeLists.txt` (`project(PromptLib VERSION X.Y.Z)`).
 2. **Run release checks** at minimum:
    ```sh
    bash ./scripts/release.sh          # or .\scripts\release.ps1
@@ -166,7 +166,7 @@ see [cmake.md](cmake.md). A release-oriented local check typically covers:
 | `ninja-release` | Optimized build + test |
 | `ninja-shared` | Shared-library build + test |
 | `ninja-asan` | AddressSanitizer + UBSan |
-| Package smoke | `find_package(PromptEditor)` consumption |
+| Package smoke | `find_package(PromptLib)` consumption |
 | Subproject smoke | `add_subdirectory()` consumption |
 
 Do not publish releases from AI-assisted changes without maintainer approval.

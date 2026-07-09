@@ -41,9 +41,9 @@ LOWER=$(echo "$PASCAL" | tr '[:upper:]' '[:lower:]')
 UPPER=$(echo "$LOWER" | tr '[:lower:]' '[:upper:]')
 
 echo "Project rename:"
-echo "  PascalCase: PromptEditor -> ${PASCAL}"
-echo "  lowercase:  prompteditor        -> ${LOWER}"
-echo "  UPPER_CASE: PROMPTEDITOR        -> ${UPPER}"
+echo "  PascalCase: PromptLib -> ${PASCAL}"
+echo "  lowercase:  promptlib        -> ${LOWER}"
+echo "  UPPER_CASE: PROMPTLIB        -> ${UPPER}"
 echo ""
 
 # Find files containing any old identifier, excluding build/, .git/, and self
@@ -54,7 +54,7 @@ files=$(find . -type f \
   ! -path './build/*' ! -path './.git/*' \
   ! -path './scripts/rename-project.sh' \
   ! -path './scripts/rename-project.ps1' \
-  -exec grep -l -e 'PromptEditor' -e 'prompteditor' -e 'PROMPTEDITOR' -e 'PromptEditor' {} + 2>/dev/null || true)
+  -exec grep -l -e 'PromptLib' -e 'promptlib' -e 'PROMPTLIB' -e 'PromptLib' {} + 2>/dev/null || true)
 
 if [ -z "$files" ]; then
   echo "No files found with original project identifiers."
@@ -64,34 +64,34 @@ fi
 
 updated=0
 for file in $files; do
-  count_pascal_std=$(grep -o 'PromptEditor' "$file" 2>/dev/null | wc -l | tr -d ' ')
-  count_lower=$(grep -o 'prompteditor' "$file" 2>/dev/null | wc -l | tr -d ' ')
-  count_upper=$(grep -o 'PROMPTEDITOR' "$file" 2>/dev/null | wc -l | tr -d ' ')
-  count_pascal=$(grep -o 'PromptEditor' "$file" 2>/dev/null | wc -l | tr -d ' ')
+  count_pascal_std=$(grep -o 'PromptLib' "$file" 2>/dev/null | wc -l | tr -d ' ')
+  count_lower=$(grep -o 'promptlib' "$file" 2>/dev/null | wc -l | tr -d ' ')
+  count_upper=$(grep -o 'PROMPTLIB' "$file" 2>/dev/null | wc -l | tr -d ' ')
+  count_pascal=$(grep -o 'PromptLib' "$file" 2>/dev/null | wc -l | tr -d ' ')
 
   sed -i.bak \
-    -e "s/PromptEditor/${PASCAL}/g" \
-    -e "s/prompteditor/${LOWER}/g" \
-    -e "s/PROMPTEDITOR/${UPPER}/g" \
-    -e "s/PromptEditor/${PASCAL}/g" \
+    -e "s/PromptLib/${PASCAL}/g" \
+    -e "s/promptlib/${LOWER}/g" \
+    -e "s/PROMPTLIB/${UPPER}/g" \
+    -e "s/PromptLib/${PASCAL}/g" \
     "$file"
   rm -f "${file}.bak"
 
   echo "  $file"
   if [ "$count_pascal_std" -gt 0 ]; then
-    echo "    PromptEditor -> ${PASCAL} ($count_pascal_std)"
+    echo "    PromptLib -> ${PASCAL} ($count_pascal_std)"
   fi
   if [ "$count_lower" -gt 0 ]; then
-    echo "    prompteditor -> ${LOWER} ($count_lower)"
+    echo "    promptlib -> ${LOWER} ($count_lower)"
   fi
   if [ "$count_upper" -gt 0 ]; then
-    echo "    PROMPTEDITOR -> ${UPPER} ($count_upper)"
+    echo "    PROMPTLIB -> ${UPPER} ($count_upper)"
   fi
-  # count_pascal includes PromptEditor matches already shown above;
-  # only print if there are additional standalone PromptEditor matches
+  # count_pascal includes PromptLib matches already shown above;
+  # only print if there are additional standalone PromptLib matches
   extra_pascal=$((count_pascal - count_pascal_std))
   if [ "$extra_pascal" -gt 0 ]; then
-    echo "    PromptEditor -> ${PASCAL} ($extra_pascal)"
+    echo "    PromptLib -> ${PASCAL} ($extra_pascal)"
   fi
   updated=$((updated + 1))
 done
@@ -100,25 +100,25 @@ echo ""
 echo "Updated ${updated} files with new project identifiers."
 
 # Rename directories
-if [ -d "include/prompteditor" ]; then
-  mv "include/prompteditor" "include/${LOWER}"
-  echo "Renamed directory: include/prompteditor -> include/${LOWER}"
+if [ -d "include/promptlib" ]; then
+  mv "include/promptlib" "include/${LOWER}"
+  echo "Renamed directory: include/promptlib -> include/${LOWER}"
 fi
 
-if [ -d "src/prompteditor" ]; then
-  mv "src/prompteditor" "src/${LOWER}"
-  echo "Renamed directory: src/prompteditor -> src/${LOWER}"
+if [ -d "src/promptlib" ]; then
+  mv "src/promptlib" "src/${LOWER}"
+  echo "Renamed directory: src/promptlib -> src/${LOWER}"
 fi
 
 # Rename cmake files
-if [ -f "cmake/PromptEditorConfig.cmake.in" ]; then
-  mv "cmake/PromptEditorConfig.cmake.in" "cmake/${PASCAL}Config.cmake.in"
-  echo "Renamed file: PromptEditorConfig.cmake.in -> ${PASCAL}Config.cmake.in"
+if [ -f "cmake/PromptLibConfig.cmake.in" ]; then
+  mv "cmake/PromptLibConfig.cmake.in" "cmake/${PASCAL}Config.cmake.in"
+  echo "Renamed file: PromptLibConfig.cmake.in -> ${PASCAL}Config.cmake.in"
 fi
 
-if [ -f "cmake/prompteditor_version.h.in" ]; then
-  mv "cmake/prompteditor_version.h.in" "cmake/${LOWER}_version.h.in"
-  echo "Renamed file: prompteditor_version.h.in -> ${LOWER}_version.h.in"
+if [ -f "cmake/promptlib_version.h.in" ]; then
+  mv "cmake/promptlib_version.h.in" "cmake/${LOWER}_version.h.in"
+  echo "Renamed file: promptlib_version.h.in -> ${LOWER}_version.h.in"
 fi
 
 echo ""

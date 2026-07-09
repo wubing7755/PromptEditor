@@ -1,6 +1,6 @@
 # Storage Format
 
-This document specifies the PromptEditor library file layout and data formats.
+This document specifies the PromptLib library file layout and data formats.
 
 ## Library Layout
 

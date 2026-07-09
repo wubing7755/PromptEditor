@@ -37,9 +37,9 @@ $Lower = $Pascal.ToLowerInvariant()
 $Upper = $Lower.ToUpperInvariant()
 
 Write-Host "Project rename:"
-Write-Host "  PascalCase: CProjectStandard -> $Pascal"
-Write-Host "  lowercase:  cproject        -> $Lower"
-Write-Host "  UPPER_CASE: CPROJECT        -> $Upper"
+Write-Host "  PascalCase: PromptLib -> $Pascal"
+Write-Host "  lowercase:  promptlib -> $Lower"
+Write-Host "  UPPER_CASE: PROMPTLIB -> $Upper"
 Write-Host ""
 
 $extensions = @('*.c', '*.h', '*.cmake', '*.txt', '*.json', '*.yml', '*.md', '*.in', '*.cpp', '*.ps1', '*.sh')
@@ -54,7 +54,7 @@ $files = Get-ChildItem -Recurse -File -Include $extensions -Path . |
     } |
     ForEach-Object {
         $content = Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue
-        if ($content -match 'CProjectStandard|cproject|CPROJECT|CProject') {
+        if ($content -match 'PromptLib|promptlib|PROMPTLIB|PromptLib') {
             $_
         }
     }
@@ -71,16 +71,16 @@ foreach ($file in $files) {
     if (-not $content) { continue }
 
     # Count occurrences before replacement
-    $countPascalStd = ([regex]::Matches($content, 'CProjectStandard')).Count
-    $countLower     = ([regex]::Matches($content, 'cproject')).Count
-    $countUpper     = ([regex]::Matches($content, 'CPROJECT')).Count
-    $countPascal    = ([regex]::Matches($content, 'CProject')).Count
+    $countPascalStd = ([regex]::Matches($content, 'PromptLib')).Count
+    $countLower     = ([regex]::Matches($content, 'promptlib')).Count
+    $countUpper     = ([regex]::Matches($content, 'PROMPTLIB')).Count
+    $countPascal    = ([regex]::Matches($content, 'PromptLib')).Count
 
     $newContent = $content `
-        -creplace 'CProjectStandard', $Pascal `
-        -creplace 'cproject', $Lower `
-        -creplace 'CPROJECT', $Upper `
-        -creplace 'CProject', $Pascal
+        -creplace 'PromptLib', $Pascal `
+        -creplace 'promptlib', $Lower `
+        -creplace 'PROMPTLIB', $Upper `
+        -creplace 'PromptLib', $Pascal
 
     if ($newContent -ne $content) {
         [System.IO.File]::WriteAllText($file.FullName, $newContent, [System.Text.UTF8Encoding]::new($false))
@@ -89,17 +89,17 @@ foreach ($file in $files) {
     $relPath = $file.FullName.Substring($RepoRoot.Path.Length + 1)
     Write-Host "  $relPath"
     if ($countPascalStd -gt 0) {
-        Write-Host "    CProjectStandard -> $Pascal ($countPascalStd)"
+        Write-Host "    PromptLib -> $Pascal ($countPascalStd)"
     }
     if ($countLower -gt 0) {
-        Write-Host "    cproject -> $Lower ($countLower)"
+        Write-Host "    promptlib -> $Lower ($countLower)"
     }
     if ($countUpper -gt 0) {
-        Write-Host "    CPROJECT -> $Upper ($countUpper)"
+        Write-Host "    PROMPTLIB -> $Upper ($countUpper)"
     }
     $extraPascal = $countPascal - $countPascalStd
     if ($extraPascal -gt 0) {
-        Write-Host "    CProject -> $Pascal ($extraPascal)"
+        Write-Host "    PromptLib -> $Pascal ($extraPascal)"
     }
     $updated++
 }
@@ -107,24 +107,24 @@ foreach ($file in $files) {
 Write-Host ""
 Write-Host "Updated $updated files with new project identifiers."
 
-if (Test-Path "include\cproject") {
-    Move-Item "include\cproject" "include\$Lower"
-    Write-Host "Renamed directory: include\cproject -> include\$Lower"
+if (Test-Path "include\promptlib") {
+    Move-Item "include\promptlib" "include\$Lower"
+    Write-Host "Renamed directory: include\promptlib -> include\$Lower"
 }
 
-if (Test-Path "src\cproject") {
-    Move-Item "src\cproject" "src\$Lower"
-    Write-Host "Renamed directory: src\cproject -> src\$Lower"
+if (Test-Path "src\promptlib") {
+    Move-Item "src\promptlib" "src\$Lower"
+    Write-Host "Renamed directory: src\promptlib -> src\$Lower"
 }
 
-if (Test-Path "cmake\CProjectStandardConfig.cmake.in") {
-    Move-Item "cmake\CProjectStandardConfig.cmake.in" "cmake\$Pascal`Config.cmake.in"
-    Write-Host "Renamed file: CProjectStandardConfig.cmake.in -> $Pascal`Config.cmake.in"
+if (Test-Path "cmake\PromptLibConfig.cmake.in") {
+    Move-Item "cmake\PromptLibConfig.cmake.in" "cmake\$Pascal`Config.cmake.in"
+    Write-Host "Renamed file: PromptLibConfig.cmake.in -> $Pascal`Config.cmake.in"
 }
 
-if (Test-Path "cmake\cproject_version.h.in") {
-    Move-Item "cmake\cproject_version.h.in" "cmake\$Lower`_version.h.in"
-    Write-Host "Renamed file: cproject_version.h.in -> $Lower`_version.h.in"
+if (Test-Path "cmake\promptlib_version.h.in") {
+    Move-Item "cmake\promptlib_version.h.in" "cmake\$Lower`_version.h.in"
+    Write-Host "Renamed file: promptlib_version.h.in -> $Lower`_version.h.in"
 }
 
 Write-Host ""

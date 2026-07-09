@@ -14,7 +14,7 @@ try {
 # Default prefix
 if (-not $Prefix) {
     if ($IsWindows -or $env:OS -eq "Windows_NT") {
-        $Prefix = Join-Path $env:LOCALAPPDATA "Programs\PromptEditor"
+        $Prefix = Join-Path $env:LOCALAPPDATA "Programs\PromptLib"
     } elseif ($IsMacOS -or $IsLinux) {
         $homeLocal = Join-Path $env:HOME ".local\bin"
         if (Test-Path $homeLocal) {
@@ -41,7 +41,7 @@ if (-not (Test-Path $BinarySrc)) {
     exit 1
 }
 
-Write-Host "=== PromptEditor Install ==="
+Write-Host "=== PromptLib Install ==="
 Write-Host "  Source:  $BinarySrc"
 Write-Host "  Prefix:  $Prefix"
 Write-Host ""

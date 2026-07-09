@@ -35,7 +35,7 @@ $Binary = Join-Path $DistDir "pp.exe"
 # Read version
 if (-not $Version) {
     $cmakeContent = Get-Content "CMakeLists.txt" -Raw
-    if ($cmakeContent -match 'project\(PromptEditor\s+VERSION\s+([0-9.]+)') {
+    if ($cmakeContent -match 'project\(PromptLib\s+VERSION\s+([0-9.]+)') {
         $Version = $Matches[1]
     } else {
         Write-Host "ERROR: Could not determine version from CMakeLists.txt." -ForegroundColor Red

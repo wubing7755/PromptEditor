@@ -1,6 +1,6 @@
 # C Project Standard
 
-> **Note:** This is the upstream engineering standard from which PromptEditor was
+> **Note:** This is the upstream engineering standard from which PromptLib was
 > scaffolded. It serves as reference documentation for the conventions used by
 > this project. For project-specific documentation, see [docs/README.md](docs/README.md).
 

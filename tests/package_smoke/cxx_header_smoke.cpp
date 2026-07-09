@@ -1,4 +1,4 @@
-#include <prompteditor/example.h>
+#include <promptlib/example.h>
 
 int main() {
     int value = 0;

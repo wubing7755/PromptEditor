@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(PromptEditorPackageSmoke LANGUAGES C CXX)
+project(PromptLibPackageSmoke LANGUAGES C CXX)
 
-find_package(PromptEditor CONFIG REQUIRED)
+find_package(PromptLib CONFIG REQUIRED)
 
-function(copy_prompteditor_runtime target)
+function(copy_promptlib_runtime target)
     if(NOT WIN32)
         return()
     endif()
@@ -16,7 +16,7 @@ function(copy_prompteditor_runtime target)
             MINSIZEREL
             NOCONFIG)
         get_target_property(runtime_location
-            PromptEditor::prompteditor_core
+            PromptLib::promptlib_core
             "IMPORTED_LOCATION_${config_name}")
         if(runtime_location)
             add_custom_command(TARGET ${target} POST_BUILD
@@ -29,12 +29,12 @@ function(copy_prompteditor_runtime target)
 endfunction()
 
 add_executable(package_smoke_c main.c)
-target_link_libraries(package_smoke_c PRIVATE PromptEditor::prompteditor_core)
-copy_prompteditor_runtime(package_smoke_c)
+target_link_libraries(package_smoke_c PRIVATE PromptLib::promptlib_core)
+copy_promptlib_runtime(package_smoke_c)
 
 add_executable(package_smoke_cxx cxx_header_smoke.cpp)
-target_link_libraries(package_smoke_cxx PRIVATE PromptEditor::prompteditor_core)
-copy_prompteditor_runtime(package_smoke_cxx)
+target_link_libraries(package_smoke_cxx PRIVATE PromptLib::promptlib_core)
+copy_promptlib_runtime(package_smoke_cxx)
 
 enable_testing()
 add_test(NAME package_smoke_c COMMAND package_smoke_c)

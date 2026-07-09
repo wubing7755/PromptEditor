@@ -1,4 +1,4 @@
-# PromptEditor — 纯 C Prompt 管理 CLI
+# PromptLib — 纯 C Prompt 管理 CLI
 
 > [English](README.md)
 
@@ -24,8 +24,8 @@
 
 ```sh
 # 克隆并构建（Windows PowerShell 请使用 .ps1 脚本）
-git clone https://github.com/wubing7755/PromptEditor
-cd PromptEditor
+git clone https://github.com/wubing7755/PromptLib
+cd PromptLib
 ./scripts/bootstrap.sh
 cmake --preset ninja-debug
 cmake --build --preset ninja-debug

@@ -1,4 +1,4 @@
-# PromptEditor — Pure C Prompt Management CLI
+# PromptLib — Pure C Prompt Management CLI
 
 > [中文版](README.zh.md)
 
@@ -25,8 +25,8 @@ file-backed library — all in pure C with zero external dependencies.
 
 ```sh
 # Clone and build (use .ps1 scripts on Windows PowerShell)
-git clone https://github.com/wubing7755/PromptEditor
-cd PromptEditor
+git clone https://github.com/wubing7755/PromptLib
+cd PromptLib
 ./scripts/bootstrap.sh
 cmake --preset ninja-debug
 cmake --build --preset ninja-debug

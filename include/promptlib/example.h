@@ -1,8 +1,8 @@
 #ifndef PP_EXAMPLE_H
 #define PP_EXAMPLE_H
 
-#include <prompteditor/compiler.h>
-#include <prompteditor/export.h>
+#include <promptlib/compiler.h>
+#include <promptlib/export.h>
 
 #ifdef __cplusplus
 extern "C" {
