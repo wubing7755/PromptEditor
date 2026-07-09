@@ -153,7 +153,16 @@ ctest --preset ninja-debug --output-on-failure
 
 ## 项目结构
 
-详见 [AGENTS.md](AGENTS.md) 了解项目布局和贡献者约定。
+```text
+include/        公共头文件
+src/            实现代码
+tests/          CTest 测试
+cmake/          CMake 构建模块
+scripts/        引导、检查和发布脚本
+docs/           文档
+```
+
+贡献者约定详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 环境变量
 

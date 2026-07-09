@@ -154,7 +154,16 @@ Supported toolchains: GCC 8+, Clang 7+, MSVC 2019+. See [docs/guides/cmake.md](d
 
 ## Project Structure
 
-See [AGENTS.md](AGENTS.md) for the project layout and contributor conventions.
+```text
+include/        Public headers
+src/            Implementation
+tests/          CTest tests
+cmake/          CMake build modules
+scripts/        Bootstrap, check, and release scripts
+docs/           Documentation
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for branch, commit, and PR conventions.
 
 ## Environment
 
