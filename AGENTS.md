@@ -30,8 +30,8 @@ src/            Implementation
 tests/          CTest tests
 cmake/          Build modules
 scripts/        Local bootstrap and check wrappers
-docs/            Contributor documentation
-docs/guides/     Topic guides
+docs/             Contributor documentation
+docs/guides/      Topic guides
 ```
 
 ## Build And Verification
