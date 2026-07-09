@@ -2117,8 +2117,8 @@ The following requirements are specified but deferred to a future release:
 
 ### 7.4 Traceability Matrix
 
-- `doc/mvp.md` — Functional specification
-- `doc/storage-format.md` — Storage layout
+- `docs/mvp.md` — Functional specification
+- `docs/storage-format.md` — Storage layout
 - `src/cli.c` — Implemented behaviors
 - `include/prompteditor/example.h` — Public API
 - `CMakeLists.txt`, `cmake/*.cmake` — Build

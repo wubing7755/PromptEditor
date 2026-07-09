@@ -7,17 +7,17 @@ Repository-specific instructions for AI agents.
 Before changing files, read:
 
 - `CONTRIBUTING.md`
-- `doc/guides/testing.md`
+- `docs/guides/testing.md`
 
 For architecture-sensitive changes, also read:
 
-- `doc/adr/README.md`
-- Relevant ADR files under `doc/adr/`
+- `docs/adr/README.md`
+- Relevant ADR files under `docs/adr/`
 
 For build, CI, packaging, release, dependency, or security work, also read:
 
-- `doc/guides/cmake.md`
-- `doc/guides/release.md`
+- `docs/guides/cmake.md`
+- `docs/guides/release.md`
 - `SECURITY.md`
 
 ## Project Shape
@@ -30,8 +30,8 @@ src/            Implementation
 tests/          CTest tests
 cmake/          Build modules
 scripts/        Local bootstrap and check wrappers
-doc/            Contributor documentation
-doc/guides/     Topic guides
+docs/             Contributor documentation
+docs/guides/      Topic guides
 ```
 
 ## Build And Verification

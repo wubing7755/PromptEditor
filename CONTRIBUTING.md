@@ -4,7 +4,7 @@ This project uses focused, reviewable changes.
 
 ## Local Checks
 
-See [doc/guides/cmake.md](doc/guides/cmake.md) for a detailed explanation of configure, build, test,
+See [docs/guides/cmake.md](docs/guides/cmake.md) for a detailed explanation of configure, build, test,
 install, presets, and common CMake troubleshooting.
 
 Setup and run local checks (`.ps1` on Windows PowerShell):
@@ -57,6 +57,10 @@ Use the issue templates for bug reports, feature proposals, and infrastructure
 maintenance requests.
 
 ## Architecture
+
+When modifying core documentation (build, testing, release), also update the
+corresponding Chinese translation under `docs/zh-CN/` if the change affects
+user-visible instructions or policy.
 
 - Keep public headers small and stable.
 - Keep implementation details out of `include/`.
