@@ -4,6 +4,25 @@ This guide explains the common CMake workflows in this project. Use it when
 you are new to CMake or when you need to add source files, tests, install rules,
 or downstream consumers.
 
+## Contents
+
+- [Requirements](#requirements)
+- [Tool Installation Notes](#tool-installation-notes)
+- [Mental Model](#mental-model)
+- [Quick Commands](#quick-commands)
+- [Presets](#presets)
+- [Important Options](#important-options)
+- [Multi-Config Generators](#multi-config-generators)
+- [Toolchain Policy](#toolchain-policy)
+- [Add A Source File](#add-a-source-file)
+- [Add A Test](#add-a-test)
+- [Install And Use With find_package](#install-and-use-with-find_package)
+- [Use As A Subproject](#use-as-a-subproject)
+- [Generated Version Header](#generated-version-header)
+- [Local Quality Checks](#local-quality-checks)
+- [Troubleshooting](#troubleshooting)
+
+
 ## Requirements
 
 These tools are not provided by the repository. Install them before configuring

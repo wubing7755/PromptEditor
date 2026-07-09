@@ -1,5 +1,12 @@
 # 0001 C11 CMake Toolchain Policy
 
+## Status
+
+Accepted.
+
+**Date**: 2026-07-05
+**Last Modified**: 2026-07-05
+
 ## Context
 
 This project should work across Windows, Linux, and macOS without baking one

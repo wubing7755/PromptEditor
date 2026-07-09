@@ -150,7 +150,7 @@ cmake --build --preset ninja-debug
 ctest --preset ninja-debug --output-on-failure
 ```
 
-Supported toolchains: GCC 8+, Clang 7+, MSVC 2019+. See [doc/guides/cmake.md](doc/guides/cmake.md) for CMake presets and detailed workflows.
+Supported toolchains: GCC 8+, Clang 7+, MSVC 2019+. See [docs/guides/cmake.md](docs/guides/cmake.md) for CMake presets and detailed workflows.
 
 ## Project Structure
 
@@ -167,11 +167,11 @@ See [AGENTS.md](AGENTS.md) for the project layout and contributor conventions.
 
 ## Storage Format
 
-Prompts are stored as plain files in a human-readable layout. See [doc/storage-format.md](doc/storage-format.md) for the full specification.
+Prompts are stored as plain files in a human-readable layout. See [docs/storage-format.md](docs/storage-format.md) for the full specification.
 
 ## Documentation
 
-See [doc/README.md](doc/README.md) for the complete documentation index.
+See [docs/README.md](docs/README.md) for the complete documentation index.
 
 [中文版](README.zh.md)
 

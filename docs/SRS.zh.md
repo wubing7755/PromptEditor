@@ -2084,8 +2084,8 @@ PP_API const char *pp_platform_name(void);
 
 ### 7.4 可追溯性矩阵
 
-- `doc/mvp.md` — 功能规范
-- `doc/storage-format.md` — 存储布局
+- `docs/mvp.md` — 功能规范
+- `docs/storage-format.md` — 存储布局
 - `src/cli.c` — 已实现的行为
 - `include/prompteditor/example.h` — 公共 API
 - `CMakeLists.txt`、`cmake/*.cmake` — 构建

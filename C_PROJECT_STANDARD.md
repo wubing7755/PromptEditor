@@ -2,7 +2,7 @@
 
 > **Note:** This is the upstream engineering standard from which PromptEditor was
 > scaffolded. It serves as reference documentation for the conventions used by
-> this project. For project-specific documentation, see [doc/README.md](doc/README.md).
+> this project. For project-specific documentation, see [docs/README.md](docs/README.md).
 
 This document defines a pragmatic baseline for small and medium C projects.
 
@@ -23,8 +23,8 @@ src/main.c           Optional CLI or app entry point
 tests/               Focused CTest tests
 cmake/               CMake modules
 scripts/             Local bootstrap and check wrappers
-doc/                 Short documentation
-doc/guides/          Topic guides
+docs/                 Short documentation
+docs/guides/          Topic guides
 .github/workflows/   CI
 ```
 
@@ -152,14 +152,14 @@ Keep local docs short:
 - `README.md` for overview and quick start.
 - `CONTRIBUTING.md` for workflow and PR expectations.
 - `SECURITY.md` for vulnerability handling.
-- `doc/README.md` for the documentation map and source-of-truth index.
-- `doc/guides/environment.md` for tool installation and environment setup.
-- `doc/guides/cmake.md` for CMake workflows, presets, package consumption, and
+- `docs/README.md` for the documentation map and source-of-truth index.
+- `docs/guides/environment.md` for tool installation and environment setup.
+- `docs/guides/cmake.md` for CMake workflows, presets, package consumption, and
   troubleshooting.
-- `doc/guides/testing.md` for test layers and expectations.
-- `doc/guides/release.md` for release steps.
+- `docs/guides/testing.md` for test layers and expectations.
+- `docs/guides/release.md` for release steps.
 - `AGENTS.md` for AI agent policy and contribution rules.
-- `doc/adr/README.md` for architecture decisions.
+- `docs/adr/README.md` for architecture decisions.
 
 ## Avoid By Default
 

@@ -149,7 +149,7 @@ cmake --build --preset ninja-debug
 ctest --preset ninja-debug --output-on-failure
 ```
 
-支持的编译器：GCC 8+、Clang 7+、MSVC 2019+。详见 [doc/guides/cmake.md](doc/guides/cmake.md)。
+支持的编译器：GCC 8+、Clang 7+、MSVC 2019+。详见 [docs/guides/cmake.md](docs/guides/cmake.md)。
 
 ## 项目结构
 
@@ -166,11 +166,11 @@ ctest --preset ninja-debug --output-on-failure
 
 ## 存储格式
 
-Prompt 以人类可读的纯文本文件存储。详见 [doc/storage-format.md](doc/storage-format.md)。
+Prompt 以人类可读的纯文本文件存储。详见 [docs/storage-format.md](docs/storage-format.md)。
 
 ## 文档
 
-完整文档索引见 [doc/README.md](doc/README.md)。
+完整文档索引见 [docs/README.md](docs/README.md)。
 
 [English](README.md)
 

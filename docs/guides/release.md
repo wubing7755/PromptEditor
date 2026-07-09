@@ -2,6 +2,16 @@
 
 This project uses automated CI release pipelines triggered by Git tags.
 
+## Contents
+
+- [Release Assets](#release-assets)
+- [Automated Release (Recommended)](#automated-release-recommended)
+- [Local Release](#local-release)
+- [Platform-Native Installers](#platform-native-installers)
+- [Release Checklist](#release-checklist)
+- [Verification](#verification)
+
+
 ## Release Assets
 
 Each release produces the following platform-specific assets:
