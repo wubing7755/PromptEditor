@@ -9,7 +9,6 @@ The canonical map of all project documentation.
 | [mvp.md](mvp.md) | MVP feature tracking — command surface and implementation status |
 | [storage-format.md](storage-format.md) | Prompt library layout and file format specification |
 | [SRS.md](SRS.md) | Software requirements specification (136 requirements) |
-| [SRS.zh.md](SRS.zh.md) | 软件需求规范（136 条需求） |
 
 ## Contributor Guides
 
