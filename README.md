@@ -173,8 +173,6 @@ Prompts are stored as plain files in a human-readable layout. See [docs/storage-
 
 See [docs/README.md](docs/README.md) for the complete documentation index.
 
-[中文版](README.zh.md)
-
 ## License
 
 MIT

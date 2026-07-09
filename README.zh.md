@@ -172,8 +172,6 @@ Prompt 以人类可读的纯文本文件存储。详见 [docs/storage-format.md]
 
 完整文档索引见 [docs/README.md](docs/README.md)。
 
-[English](README.md)
-
 ## 许可证
 
 MIT
